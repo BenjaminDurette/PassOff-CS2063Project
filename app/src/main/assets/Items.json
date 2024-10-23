@@ -1,0 +1,16 @@
+{
+    "items":    [
+        {
+            "itemName": "MyUNB",
+            "username": "ijewett",
+            "password": "iLoveMobileDev",
+            "domain": "login.microsoftonline.com"
+        },
+        {
+            "itemName": "Google",
+            "username": "isaac.jewett@gmail.com",
+            "password": "notmyrealpassword",
+            "domain": "google.com"
+        }
+    ]
+}
