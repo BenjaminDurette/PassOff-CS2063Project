@@ -4,26 +4,28 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp">
-
     <EditText
-        android:id="@+id/nameEditText"
+        android:id="@+id/titleEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter your name"
+        android:hint="Title"
         android:inputType="text" />
-
     <EditText
         android:id="@+id/usernameEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter your username"
+        android:hint="Username"
         android:inputType="text" />
-
     <EditText
         android:id="@+id/passwordEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter your password"
+        android:hint="Password"
         android:inputType="textPassword" />
-
+    <EditText
+        android:id="@+id/domainEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="URL"
+        android:inputType="text" />
 </LinearLayout>
