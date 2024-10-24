@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
         val addPasswordButton = findViewById<Button>(R.id.addpassword_button)
         addPasswordButton.setOnClickListener    {
             addPasswordDialogue()
@@ -60,10 +61,15 @@ class MainActivity : AppCompatActivity() {
                 val domain = domainEditText.text.toString()
 
                 Log.d(TAG, "$title/$username/$password/$domain");
+                val jsonUtils = JsonUtils(this)
+                val passItem = PassItem(title,username,password,domain)
+                jsonUtils.addPassItem(this, passItem)
                 // Show a toast or handle the data
                 /*dbHandler = DBHandler(this)
                 this.dbHandler!!.addNewPassword(title, username, password, domain)*/
-
+                val intent = Intent(this, MainActivity::class.java)
+                finish() // Close the current activity
+                startActivity(intent) // Start the new activity
                 dialog.dismiss()  // Close the dialog
 
                 Toast.makeText(this, "Password has been added.", Toast.LENGTH_SHORT).show()

@@ -1,10 +1,15 @@
 package com.example.passoff
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
+import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import org.w3c.dom.Text
 
 class itemView : AppCompatActivity() {
@@ -31,5 +36,23 @@ class itemView : AppCompatActivity() {
 
         this.title = itemName
 
+        val copyButton = findViewById<Button>(R.id.copy_button)
+        copyButton.setOnClickListener    {
+            copyPasswordToClipboard(password)
+        }
+    }
+
+    private fun copyPasswordToClipboard(password: String?) {
+        if (password != null) {
+            // Get the ClipboardManager
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            // Create a ClipData object
+            val clip = ClipData.newPlainText("Password", password)
+            // Set the clip
+            clipboard.setPrimaryClip(clip)
+
+            // Show a toast message to inform the user
+            Toast.makeText(this, "Password copied to clipboard", Toast.LENGTH_SHORT).show()
+        }
     }
 }
