@@ -1,7 +1,10 @@
 package com.example.passoff
 
+import android.content.ContentValues.TAG
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.EditText
@@ -56,6 +59,7 @@ class MainActivity : AppCompatActivity() {
                 val password = passwordEditText.text.toString()
                 val domain = domainEditText.text.toString()
 
+                Log.d(TAG, "$title/$username/$password/$domain");
                 // Show a toast or handle the data
                 /*dbHandler = DBHandler(this)
                 this.dbHandler!!.addNewPassword(title, username, password, domain)*/
