@@ -28,23 +28,26 @@ class LoadDataTask(private val activity: AppCompatActivity) {
     }
 
     fun execute() {
-        Executors.newSingleThreadExecutor().execute {
-            val mainHandler = Handler(Looper.getMainLooper())
-            circularProgressIndicator!!.visibility = ProgressBar.VISIBLE
-
-            val jsonUtils = JsonUtils(appContext)
-            val newItems = jsonUtils.processJSON(appContext)
-
-            mainHandler.post {updateDisplay(newItems)}
-
+        // Show the progress indicator on the main thread before starting background work
+        activity.runOnUiThread {
+            circularProgressIndicator.visibility = ProgressBar.VISIBLE
         }
 
+        // Perform the data loading in a background thread
+        Executors.newSingleThreadExecutor().execute {
+            val dbHandler = DBHandler(appContext)
+            val newItems = dbHandler.getPasswords()  // Load data from the database
 
+            // Update the UI on the main thread after loading the data
+            Handler(Looper.getMainLooper()).post {
+                updateDisplay(newItems)
+            }
+        }
     }
 
     private fun updateDisplay(newItems: ArrayList<PassItem>) {
         setupRecyclerView(newItems)
-        circularProgressIndicator!!.visibility = ProgressBar.INVISIBLE
+        circularProgressIndicator.visibility = ProgressBar.INVISIBLE
         Toast.makeText(appContext, "Data loaded successfully", Toast.LENGTH_SHORT).show()
 
     }
@@ -56,6 +59,4 @@ class LoadDataTask(private val activity: AppCompatActivity) {
     companion object {
         private const val TAG = "LoadDataTask"
     }
-
-
 }

@@ -33,6 +33,27 @@ class DBHandler (context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, D
         db.close()
     }
 
+    fun getPasswords(): ArrayList<PassItem> {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME", null)
+        val passList = ArrayList<PassItem>()
+
+        if (cursor.moveToFirst()) {
+            do {
+                val title = cursor.getString(cursor.getColumnIndexOrThrow("entryname"))
+                val username = cursor.getString(cursor.getColumnIndexOrThrow("username"))
+                val password = cursor.getString(cursor.getColumnIndexOrThrow("password"))
+                val domain = cursor.getString(cursor.getColumnIndexOrThrow("description"))
+
+                val passItem = PassItem(title, username, password, domain) // Ensure PassItem constructor matches the columns
+                passList.add(passItem)
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        db.close()
+        return passList
+    }
+
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         // this method is called to check if the table exists already.
         db.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")

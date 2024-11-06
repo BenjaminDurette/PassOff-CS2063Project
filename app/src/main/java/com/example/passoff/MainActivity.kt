@@ -12,6 +12,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var progressIndicator: CircularProgressIndicator
+    private lateinit var recyclerView: RecyclerView
+    private var dbHandler: DBHandler? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -21,18 +26,17 @@ class MainActivity : AppCompatActivity() {
             addPasswordDialogue()
         }
 
-        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
+        recyclerView = findViewById(R.id.recyclerView)
+        progressIndicator = findViewById(R.id.circularProgressIndicator)
 
-        val progressIndicator: CircularProgressIndicator = findViewById(R.id.circularProgressIndicator)
+        loadData()
+    }
 
+    private fun loadData() {
         val loadDataTask = LoadDataTask(this)
         loadDataTask.setRecyclerView(recyclerView)
         loadDataTask.setCircularProgressIndicator(progressIndicator)
         loadDataTask.execute()
-
-
-
-
     }
 
     private fun addPasswordDialogue() {
@@ -48,7 +52,7 @@ class MainActivity : AppCompatActivity() {
         // Build the AlertDialog
         val dialog = AlertDialog.Builder(this)
             .setTitle("Enter New Password Information")
-            .setView(dialogView)  // Set the custom layout in the dialog
+            .setView(dialogView)
             .setPositiveButton("Submit") { dialog, _ ->
                 // Retrieve user input from the EditText fields
                 val title = titleEditText.text.toString()
@@ -56,20 +60,20 @@ class MainActivity : AppCompatActivity() {
                 val password = passwordEditText.text.toString()
                 val domain = domainEditText.text.toString()
 
-                // Show a toast or handle the data
-                /*dbHandler = DBHandler(this)
-                this.dbHandler!!.addNewPassword(title, username, password, domain)*/
+                dbHandler = DBHandler(this)
+                this.dbHandler!!.addNewPassword(title, username, password, domain)
 
-                dialog.dismiss()  // Close the dialog
+                dialog.dismiss()
 
                 Toast.makeText(this, "Password has been added.", Toast.LENGTH_SHORT).show()
+
+                loadData()
             }
             .setNegativeButton("Cancel") { dialog, _ ->
-                dialog.cancel()  // Close the dialog without doing anything
+                dialog.cancel()
             }
             .create()
 
-        // Show the dialog
         dialog.show()
     }
 }
