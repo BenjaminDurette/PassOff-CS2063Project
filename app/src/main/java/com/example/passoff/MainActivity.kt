@@ -1,5 +1,6 @@
 package com.example.passoff
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,13 +9,14 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var progressIndicator: CircularProgressIndicator
     private lateinit var recyclerView: RecyclerView
+    private lateinit var passwordAdapter: PasswordAdapter
     private var dbHandler: DBHandler? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,17 +28,6 @@ class MainActivity : AppCompatActivity() {
             addPasswordDialogue()
         }
 
-        recyclerView = findViewById(R.id.recyclerView)
-        progressIndicator = findViewById(R.id.circularProgressIndicator)
-
-        loadData()
-    }
-
-    private fun loadData() {
-        val loadDataTask = LoadDataTask(this)
-        loadDataTask.setRecyclerView(recyclerView)
-        loadDataTask.setCircularProgressIndicator(progressIndicator)
-        loadDataTask.execute()
     }
 
     private fun addPasswordDialogue() {
@@ -52,7 +43,7 @@ class MainActivity : AppCompatActivity() {
         // Build the AlertDialog
         val dialog = AlertDialog.Builder(this)
             .setTitle("Enter New Password Information")
-            .setView(dialogView)
+            .setView(dialogView)  // Set the custom layout in the dialog
             .setPositiveButton("Submit") { dialog, _ ->
                 // Retrieve user input from the EditText fields
                 val title = titleEditText.text.toString()
@@ -60,20 +51,20 @@ class MainActivity : AppCompatActivity() {
                 val password = passwordEditText.text.toString()
                 val domain = domainEditText.text.toString()
 
+                // Show a toast or handle the data
                 dbHandler = DBHandler(this)
                 this.dbHandler!!.addNewPassword(title, username, password, domain)
 
-                dialog.dismiss()
+                dialog.dismiss()  // Close the dialog
 
                 Toast.makeText(this, "Password has been added.", Toast.LENGTH_SHORT).show()
-
-                loadData()
             }
             .setNegativeButton("Cancel") { dialog, _ ->
-                dialog.cancel()
+                dialog.cancel()  // Close the dialog without doing anything
             }
             .create()
 
+        // Show the dialog
         dialog.show()
     }
 }
