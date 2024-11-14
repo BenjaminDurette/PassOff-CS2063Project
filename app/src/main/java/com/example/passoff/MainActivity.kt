@@ -1,6 +1,5 @@
 package com.example.passoff
 
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -12,21 +11,33 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Check if the user is logged in
+        val sharedPreferences = getSharedPreferences("MyApp", Context.MODE_PRIVATE)
+        val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
+
+        if (!isLoggedIn) {
+            // Redirect to LoginActivity if not logged in
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_main)
 
-
         val addPasswordButton = findViewById<Button>(R.id.addpassword_button)
-        addPasswordButton.setOnClickListener    {
+        addPasswordButton.setOnClickListener {
             addPasswordDialogue()
         }
 
         val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
-
         val progressIndicator: CircularProgressIndicator = findViewById(R.id.circularProgressIndicator)
 
         val loadDataTask = LoadDataTask(this)
@@ -34,9 +45,27 @@ class MainActivity : AppCompatActivity() {
         loadDataTask.setCircularProgressIndicator(progressIndicator)
         loadDataTask.execute()
 
-
-
-
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        bottomNavigationView.setOnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.navigation_home -> {
+                    // Handle Home action
+                    Toast.makeText(this, "Home selected", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                R.id.navigation_search -> {
+                    // Handle Search action
+                    Toast.makeText(this, "Search selected", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                R.id.navigation_quickshare -> {
+                    // Handle Quickshare action
+                    Toast.makeText(this, "Quickshare selected", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
     private fun addPasswordDialogue() {
@@ -60,13 +89,10 @@ class MainActivity : AppCompatActivity() {
                 val password = passwordEditText.text.toString()
                 val domain = domainEditText.text.toString()
 
-                Log.d(TAG, "$title/$username/$password/$domain");
                 val jsonUtils = JsonUtils(this)
-                val passItem = PassItem(title,username,password,domain)
+                val passItem = PassItem(title, username, password, domain)
                 jsonUtils.addPassItem(this, passItem)
                 // Show a toast or handle the data
-                /*dbHandler = DBHandler(this)
-                this.dbHandler!!.addNewPassword(title, username, password, domain)*/
                 val intent = Intent(this, MainActivity::class.java)
                 finish() // Close the current activity
                 startActivity(intent) // Start the new activity
