@@ -10,33 +10,42 @@
 
     <TextView
         android:id="@+id/item_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
         android:layout_margin="16dp"
         android:text="Item Name"
         android:textAppearance="?attr/textAppearanceListItem" />
 
     <TextView
         android:id="@+id/item_username"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
         android:layout_margin="16dp"
         android:text="Username"
         android:textAppearance="?attr/textAppearanceListItem" />
+
     <TextView
         android:id="@+id/item_password"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
         android:layout_margin="16dp"
         android:text="Password"
         android:textAppearance="?attr/textAppearanceListItem" />
+
     <TextView
         android:id="@+id/item_domain"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
         android:layout_margin="16dp"
         android:text="Domain"
         android:textAppearance="?attr/textAppearanceListItem" />
+
+    <Button
+        android:id="@+id/delete_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#B80404"
+        android:text="Delete Password" />
 
 </LinearLayout>
 

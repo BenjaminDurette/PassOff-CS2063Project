@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
+import android.widget.Button
 import android.widget.TextView
 import org.w3c.dom.Text
 
@@ -30,6 +31,22 @@ class itemView : AppCompatActivity() {
         domainText.text = domain
 
         this.title = itemName
+
+        val deleteButton = findViewById<Button>(R.id.delete_button)
+        deleteButton.setOnClickListener {
+            val dbHandler = DBHandler(this)
+            val success = dbHandler.deletePassword(this.intent.getIntExtra("id", -1))
+            val loadDataTask = LoadDataTask(this)
+            loadDataTask.setRecyclerView(MainActivity.recyclerView)
+            loadDataTask.setCircularProgressIndicator(MainActivity.progressIndicator)
+            loadDataTask.execute()
+            if (success) {
+                Log.d("Database", "Password deleted successfully")
+            } else {
+                Log.e("Database", "Failed to delete password")
+            }
+            finish()
+        }
 
     }
 }

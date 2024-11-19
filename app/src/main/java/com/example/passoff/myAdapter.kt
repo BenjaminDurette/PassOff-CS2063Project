@@ -35,6 +35,7 @@ class MyAdapter(private val parentActivity: Activity, private val mDataset: Arra
             intent.putExtra("username", item.username)
             intent.putExtra("password", item.password)
             intent.putExtra("domain", item.domain)
+            intent.putExtra("id", item.id)
             parentActivity.startActivity(intent)
         }
     }

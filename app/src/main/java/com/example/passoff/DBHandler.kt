@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.Toast
 
 class DBHandler (context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
 
@@ -33,6 +34,17 @@ class DBHandler (context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, D
         db.close()
     }
 
+    fun deletePassword(id: Int): Boolean {
+        val db = this.writableDatabase
+        if (id <= 0) {
+            db.close()
+            return false
+        }
+        db.delete(TABLE_NAME, "$ID_COL=?", arrayOf(id.toString()))
+        db.close()
+        return true
+    }
+
     fun getPasswords(): ArrayList<PassItem> {
         val db = this.readableDatabase
         val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME", null)
@@ -40,12 +52,13 @@ class DBHandler (context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, D
 
         if (cursor.moveToFirst()) {
             do {
-                val title = cursor.getString(cursor.getColumnIndexOrThrow("entryname"))
-                val username = cursor.getString(cursor.getColumnIndexOrThrow("username"))
-                val password = cursor.getString(cursor.getColumnIndexOrThrow("password"))
-                val domain = cursor.getString(cursor.getColumnIndexOrThrow("description"))
+                val id = cursor.getInt(cursor.getColumnIndexOrThrow(ID_COL))
+                val title = cursor.getString(cursor.getColumnIndexOrThrow(ENTRYNAME_COL))
+                val username = cursor.getString(cursor.getColumnIndexOrThrow(USERNAME_COL))
+                val password = cursor.getString(cursor.getColumnIndexOrThrow(PASSWORD_COL))
+                val domain = cursor.getString(cursor.getColumnIndexOrThrow(DESCRIPTION_COL))
 
-                val passItem = PassItem(title, username, password, domain) // Ensure PassItem constructor matches the columns
+                val passItem = PassItem(id, title, username, password, domain) // Ensure PassItem constructor matches the columns
                 passList.add(passItem)
             } while (cursor.moveToNext())
         }

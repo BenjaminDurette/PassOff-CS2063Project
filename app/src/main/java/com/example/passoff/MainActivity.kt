@@ -1,8 +1,10 @@
 package com.example.passoff
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Window
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -13,8 +15,6 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var progressIndicator: CircularProgressIndicator
-    private lateinit var recyclerView: RecyclerView
     private var dbHandler: DBHandler? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,13 +55,18 @@ class MainActivity : AppCompatActivity() {
             .setView(dialogView)
             .setPositiveButton("Submit") { dialog, _ ->
                 // Retrieve user input from the EditText fields
-                val title = titleEditText.text.toString()
-                val username = usernameEditText.text.toString()
-                val password = passwordEditText.text.toString()
-                val domain = domainEditText.text.toString()
+                if (titleEditText.text.isNotEmpty() && usernameEditText.text.isNotEmpty() && passwordEditText.text.isNotEmpty()) {
+                    if (domainEditText.text.isEmpty()) {
+                        domainEditText.setText("N/A")
+                    }
+                    val title = titleEditText.text.toString()
+                    val username = usernameEditText.text.toString()
+                    val password = passwordEditText.text.toString()
+                    val domain = domainEditText.text.toString()
 
-                dbHandler = DBHandler(this)
-                this.dbHandler!!.addNewPassword(title, username, password, domain)
+                    dbHandler = DBHandler(this)
+                    this.dbHandler!!.addNewPassword(title, username, password, domain)
+                }
 
                 dialog.dismiss()
 
@@ -75,5 +80,10 @@ class MainActivity : AppCompatActivity() {
             .create()
 
         dialog.show()
+    }
+
+    companion object {
+        lateinit var progressIndicator: CircularProgressIndicator
+        lateinit var recyclerView: RecyclerView
     }
 }
