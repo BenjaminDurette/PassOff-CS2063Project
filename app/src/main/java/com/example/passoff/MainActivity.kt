@@ -26,6 +26,12 @@ class MainActivity : AppCompatActivity() {
             addPasswordDialogue()
         }
 
+        val settingsButton = findViewById<Button>(R.id.settingsButton)
+        settingsButton.setOnClickListener {
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
+        }
+
         recyclerView = findViewById(R.id.recyclerView)
         progressIndicator = findViewById(R.id.circularProgressIndicator)
 
