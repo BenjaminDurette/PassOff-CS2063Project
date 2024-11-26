@@ -25,7 +25,8 @@
         android:layout_height="wrap_content"
         android:text="ToggleButton"
         android:translationX="275dp"
-        android:translationY="20dp" />
+        android:translationY="20dp"
+        />
 
     <ToggleButton
         android:id="@+id/toggleTouchID"
@@ -33,6 +34,7 @@
         android:layout_height="wrap_content"
         android:text="ToggleButton"
         android:translationX="275dp"
-        android:translationY="100dp" />
+        android:translationY="100dp"
+        />
 
 </FrameLayout>

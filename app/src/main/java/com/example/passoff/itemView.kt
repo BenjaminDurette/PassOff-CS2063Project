@@ -1,8 +1,6 @@
 package com.example.passoff
 
 import android.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.LayoutInflater
@@ -78,27 +76,28 @@ class itemView : AppCompatActivity() {
                 }
                 .create()
             dialog.show()
-        val copyButton = findViewById<Button>(R.id.copy_button)
-        copyButton.setOnClickListener {
-            copyPasswordToClipboard(password)
-        }
-
-        val encryptLabel = findViewById<TextView>(R.id.encrypted_text)
-        val encryptButton = findViewById<Button>(R.id.encrypt_button)
-        val decryptButton = findViewById<Button>(R.id.decrypt_button)
-
-        encryptButton.setOnClickListener {
-            if (password != null) {
-                val encryptedText = encryptPassword(password)
-                encryptLabel.text = "Encryption Text: $encryptedText"
+            val copyButton = findViewById<Button>(R.id.copy_button)
+            copyButton.setOnClickListener {
+                copyPasswordToClipboard(password)
             }
-        }
 
-        // Decrypt button click listener
-        decryptButton.setOnClickListener {
-            val encryptedText = encryptLabel.text.toString().removePrefix("Encryption Text: ")
-            val decryptedText = decrypt(encryptedText)
-            encryptLabel.text = "Decryption Text: $decryptedText"
+            val encryptLabel = findViewById<TextView>(R.id.encrypted_text)
+            val encryptButton = findViewById<Button>(R.id.encrypt_button)
+            val decryptButton = findViewById<Button>(R.id.decrypt_button)
+
+            encryptButton.setOnClickListener {
+                if (password != null) {
+                    val encryptedText = encryptPassword(password)
+                    encryptLabel.text = "Encryption Text: $encryptedText"
+                }
+            }
+
+            // Decrypt button click listener
+            decryptButton.setOnClickListener {
+                val encryptedText = encryptLabel.text.toString().removePrefix("Encryption Text: ")
+                val decryptedText = decrypt(encryptedText)
+                encryptLabel.text = "Decryption Text: $decryptedText"
+            }
         }
     }
 

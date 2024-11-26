@@ -12,7 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 
-class MyAdapter(private val parentActivity: Activity, private val mDataset: ArrayList<PassItem>, private val jsonUtils: JsonUtils) :
+class MyAdapter(private val parentActivity: Activity, private val mDataset: ArrayList<PassItem>) :
     RecyclerView.Adapter<MyAdapter.ViewHolder>() {
 
     // Update ViewHolder to hold all TextViews in item_layout
@@ -44,15 +44,6 @@ class MyAdapter(private val parentActivity: Activity, private val mDataset: Arra
             parentActivity.startActivity(intent)
         }
 
-        holder.deleteButton.setOnClickListener {
-            jsonUtils.deletePassItem(parentActivity, item.title) // Use the title to delete the item
-            Toast.makeText(parentActivity, "Item successfully deleted", Toast.LENGTH_SHORT).show()
-            // Finish the current MainActivity and restart it
-            val intent = Intent(parentActivity, MainActivity::class.java)
-            parentActivity.finish() // Finish the current instance
-            parentActivity.startActivity(intent) // Start a new instance
-
-        }
 
     }
 
