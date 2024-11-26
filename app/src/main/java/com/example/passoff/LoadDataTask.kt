@@ -53,7 +53,7 @@ class LoadDataTask(private val activity: AppCompatActivity) {
     }
 
     private fun setupRecyclerView(newItems: ArrayList<PassItem>) {
-        recyclerView.adapter = MyAdapter(activity, newItems)
+        recyclerView.adapter = MyAdapter(activity, newItems, JsonUtils(appContext))
     }
 
     companion object {
