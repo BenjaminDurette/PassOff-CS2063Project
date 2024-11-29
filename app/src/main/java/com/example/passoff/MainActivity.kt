@@ -8,12 +8,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
-import android.view.Window
 import android.widget.Button
-import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -22,16 +19,15 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 class MainActivity : AppCompatActivity() {
 
     private var dbHandler: DBHandler? = null
+    private val ADD_PASSWORD_REQUEST_CODE = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Check if the user is logged in
         val sharedPreferences = getSharedPreferences("MyApp", Context.MODE_PRIVATE)
         val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
 
         if (!isLoggedIn) {
-            // Redirect to LoginActivity if not logged in
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
@@ -43,7 +39,8 @@ class MainActivity : AppCompatActivity() {
 
         val addPasswordButton = findViewById<Button>(R.id.addpassword_button)
         addPasswordButton.setOnClickListener {
-            addPasswordDialogue()
+            val intent = Intent(this, AddPasswordActivity::class.java)
+            startActivityForResult(intent, ADD_PASSWORD_REQUEST_CODE)
         }
 
         val settingsButton = findViewById<ImageButton>(R.id.settingsButton)
@@ -58,6 +55,25 @@ class MainActivity : AppCompatActivity() {
         loadData()
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == ADD_PASSWORD_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            data?.let {
+                val title = it.getStringExtra("title")
+                val username = it.getStringExtra("username")
+                val password = it.getStringExtra("password")
+                val domain = it.getStringExtra("domain")
+
+                if (title != null && username != null && password != null && domain != null) {
+                    dbHandler = DBHandler(this)
+                    dbHandler!!.addNewPassword(title, username, password, domain)
+                    Toast.makeText(this, "Password has been added.", Toast.LENGTH_SHORT).show()
+                    loadData()
+                }
+            }
+        }
+    }
+
     private fun loadData() {
         val loadDataTask = LoadDataTask(this)
         loadDataTask.setRecyclerView(recyclerView)
@@ -68,66 +84,20 @@ class MainActivity : AppCompatActivity() {
         bottomNavigationView.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.navigation_home -> {
-                    // Handle Home action
                     Toast.makeText(this, "Home selected", Toast.LENGTH_SHORT).show()
                     true
                 }
                 R.id.navigation_search -> {
-                    // Handle Search action
                     Toast.makeText(this, "Search selected", Toast.LENGTH_SHORT).show()
                     true
                 }
                 R.id.navigation_quickshare -> {
-                    // Handle Quickshare action
                     Toast.makeText(this, "Quickshare selected", Toast.LENGTH_SHORT).show()
                     true
                 }
                 else -> false
             }
         }
-    }
-
-    private fun addPasswordDialogue() {
-        // Inflate the custom layout that contains multiple EditText fields
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_input, null)
-
-        // Create references to the input fields in the custom layout
-        val titleEditText = dialogView.findViewById<EditText>(R.id.titleEditText)
-        val usernameEditText = dialogView.findViewById<EditText>(R.id.usernameEditText)
-        val passwordEditText = dialogView.findViewById<EditText>(R.id.passwordEditText)
-        val domainEditText = dialogView.findViewById<EditText>(R.id.domainEditText)
-
-        // Build the AlertDialog
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("Enter New Password Information")
-            .setView(dialogView)
-            .setPositiveButton("Submit") { dialog, _ ->
-                // Retrieve user input from the EditText fields
-                if (titleEditText.text.isNotEmpty() && usernameEditText.text.isNotEmpty() && passwordEditText.text.isNotEmpty()) {
-                    if (domainEditText.text.isEmpty()) {
-                        domainEditText.setText("N/A")
-                    }
-                    val title = titleEditText.text.toString()
-                    val username = usernameEditText.text.toString()
-                    val password = passwordEditText.text.toString()
-                    val domain = domainEditText.text.toString()
-
-                    dbHandler = DBHandler(this)
-                    this.dbHandler!!.addNewPassword(title, username, password, domain)
-                }
-
-                dialog.dismiss()
-
-                Toast.makeText(this, "Password has been added.", Toast.LENGTH_SHORT).show()
-
-                loadData()
-            }
-            .setNegativeButton("Cancel") { dialog, _ ->
-                dialog.cancel()
-            }
-            .create()
-
-        dialog.show()
     }
 
     companion object {
