@@ -3,6 +3,7 @@ package com.example.passoff
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -11,9 +12,17 @@ import androidx.appcompat.app.AppCompatActivity
 class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        val needsPasswordSetup = true // Example flag
+
+        if (needsPasswordSetup) {
+            val intent = Intent(this, CreatePasswordActivity::class.java)
+            startActivity(intent)
+            finish()
+            return
+        }
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-
         val loginButton = findViewById<Button>(R.id.login_button)
         loginButton.setOnClickListener {
             val username = findViewById<EditText>(R.id.usernameEditText).text.toString()
