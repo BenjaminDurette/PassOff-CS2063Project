@@ -1,9 +1,9 @@
 package com.example.passoff
 
+import android.app.Activity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
@@ -24,7 +24,7 @@ class CreatePasswordActivity : AppCompatActivity() {
             if (isPasswordValid(password) && password == confirmPassword) {
                 // Proceed with password creation logic
                 Toast.makeText(this, "Password set successfully!", Toast.LENGTH_SHORT).show()
-                // Set Password
+                setResult(Activity.RESULT_OK)
                 finish()
             } else {
                 Toast.makeText(this, "Passwords do not match or do not meet the complexity requirements.", Toast.LENGTH_SHORT).show()
