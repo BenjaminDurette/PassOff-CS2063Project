@@ -11,6 +11,8 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.passoff.MainActivity.Companion.progressIndicator
+import com.example.passoff.MainActivity.Companion.recyclerView
 
 class MyAdapter(private val parentActivity: Activity, private val mDataset: ArrayList<PassItem>) :
     RecyclerView.Adapter<MyAdapter.ViewHolder>() {
@@ -44,6 +46,16 @@ class MyAdapter(private val parentActivity: Activity, private val mDataset: Arra
             parentActivity.startActivity(intent)
         }
 
+        holder.deleteButton.setOnClickListener {
+            val dbHandler = DBHandler(parentActivity)
+            val success = dbHandler.deletePassword(item.id)
+            if (success) {
+                Toast.makeText(parentActivity, "Password deleted successfully", Toast.LENGTH_SHORT).show()
+                mDataset.removeAt(position)
+                notifyItemRemoved(position)
+                notifyItemRangeChanged(position, mDataset.size)
+            }
+        }
 
     }
 
