@@ -165,6 +165,7 @@ class QuickshareActivity : AppCompatActivity() {
             var attempt = 0
             while (attempt < maxRetries) {
                 try {
+                    Log.d("run", "Before socket?.connect()")
                     socket?.connect()
                     runOnUiThread {
                         Toast.makeText(this@QuickshareActivity, "Connected to device: ${device.name}", Toast.LENGTH_SHORT).show()
@@ -184,22 +185,29 @@ class QuickshareActivity : AppCompatActivity() {
         }
 
         private fun manageConnectedSocket(socket: BluetoothSocket) {
+            Log.d("manageConnectedSocket", "Beggining")
             val inputStream = socket.inputStream
             val outputStream = socket.outputStream
 
             val buffer = ByteArray(1024)
             var bytes: Int
+
             while (true) {
                 try {
                     bytes = inputStream.read(buffer)
+                    Log.d("manageConnectedSocket", "After inputStream.read")
                     val receivedMessage = String(buffer, 0, bytes)
+                    Log.d("manageConnectedSocket", "After String buffer")
                     if (receivedMessage == matchCode) {
                         sendEncryptedMessage(passwordToSend ?: "")
+                        Log.d("manageConnectedSocket", "After send encrypted")
                         Toast.makeText(this@QuickshareActivity, "Match code received, sending encrypted message.", Toast.LENGTH_SHORT).show()
                     } else {
+                        Log.d("manageConnectedSocket", "Match codes did not match")
                         sendAcknowledgment(false)
                     }
                 } catch (e: Exception) {
+                    Log.e("manageConnectedSocket", "Failure in MCS")
                     break
                 }
             }
