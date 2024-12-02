@@ -1,5 +1,6 @@
 package com.example.passoff
 
+import UserDBHandler
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -17,7 +18,7 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val needsPasswordSetup = false // Replace with logic to add password setup
+        val needsPasswordSetup = true // Replace with logic to add password setup
 
         if (needsPasswordSetup) {
             val intent = Intent(this, CreatePasswordActivity::class.java)
@@ -31,10 +32,9 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
         val loginButton = findViewById<Button>(R.id.login_button)
         loginButton.setOnClickListener {
-            val username = findViewById<EditText>(R.id.usernameEditText).text.toString()
             val password = findViewById<EditText>(R.id.passwordEditText).text.toString()
 
-            if (authenticate(username, password)) {
+            if (authenticate(password)) {
                 // Save login state (this is just an example, you should use a secure method)
                 getSharedPreferences("MyApp", Context.MODE_PRIVATE)
                     .edit()
@@ -62,8 +62,16 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun authenticate(username: String, password: String): Boolean {
-        // Replace this with your actual authentication logic
+    private fun authenticate(password: String): Boolean {
+        val userDBHandler = UserDBHandler(this)
+        val logins = userDBHandler.getAllLogins()
+        if (logins.isEmpty()) {
+            return false
+        }
+        val storedPassword = logins[0]["password"]
+        if (storedPassword != password) {
+            return false
+        }
         return true
     }
 }

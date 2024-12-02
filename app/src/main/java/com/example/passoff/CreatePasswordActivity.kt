@@ -1,5 +1,6 @@
 package com.example.passoff
 
+import UserDBHandler
 import android.app.Activity
 import android.os.Bundle
 import android.widget.Button
@@ -12,6 +13,7 @@ class CreatePasswordActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_password)
+        val userDBHandler = UserDBHandler(this)
 
         val passwordEditText = findViewById<EditText>(R.id.passwordEditText)
         val confirmPasswordEditText = findViewById<EditText>(R.id.confirmPasswordEditText)
@@ -22,7 +24,7 @@ class CreatePasswordActivity : AppCompatActivity() {
             val confirmPassword = confirmPasswordEditText.text.toString()
 
             if (isPasswordValid(password) && password == confirmPassword) {
-                // Proceed with password creation logic
+                userDBHandler.addLogin(password)
                 Toast.makeText(this, "Password set successfully!", Toast.LENGTH_SHORT).show()
                 setResult(Activity.RESULT_OK)
                 finish()
