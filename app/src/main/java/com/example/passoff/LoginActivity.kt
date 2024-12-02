@@ -18,9 +18,9 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val needsPasswordSetup = true // Replace with logic to add password setup
-
-        if (needsPasswordSetup) {
+        val userDBHandler = UserDBHandler(this)
+        val logins = userDBHandler.getAllLogins()
+        if (logins.isEmpty()) {
             val intent = Intent(this, CreatePasswordActivity::class.java)
             startActivityForResult(intent, CREATE_PASSWORD_REQUEST)
         } else {
