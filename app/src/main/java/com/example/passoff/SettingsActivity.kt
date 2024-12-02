@@ -10,6 +10,7 @@ import android.widget.Switch
 import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
 import android.graphics.Color
+import android.view.MenuItem
 import android.widget.Button
 import android.widget.Toast
 
@@ -18,6 +19,7 @@ class SettingsActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
         this.title = "Settings"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val logoutButton = findViewById<Button>(R.id.logoutButton)
         logoutButton.setOnClickListener {
@@ -88,6 +90,16 @@ class SettingsActivity: AppCompatActivity() {
                 touchIDToggle.setBackgroundColor(getResources().getColor(R.color.grey))
 
             }
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 }

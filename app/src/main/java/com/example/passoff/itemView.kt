@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
 import android.util.Base64
+import android.view.MenuItem
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
@@ -34,6 +35,7 @@ class itemView : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.password_detail)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         // Generate the secret key
         secretKey = generateKey()
@@ -76,7 +78,7 @@ class itemView : AppCompatActivity() {
 
         val copyUsername = findViewById<ImageButton>(R.id.copy_username)
         copyUsername.setOnClickListener {
-            copyPasswordToClipboard(usernameText.text.toString())
+            copyUsernameToClipboard(usernameText.text.toString())
         }
 
         val copyPassword = findViewById<ImageButton>(R.id.copy_password)
@@ -86,7 +88,7 @@ class itemView : AppCompatActivity() {
 
         val copyDomain = findViewById<ImageButton>(R.id.copy_url)
         copyDomain.setOnClickListener {
-            copyPasswordToClipboard(domainText.text.toString())
+            copyDomainToClipboard(domainText.text.toString())
         }
 
         val deleteButton = findViewById<Button>(R.id.delete_button)
@@ -188,6 +190,16 @@ class itemView : AppCompatActivity() {
             dialog.show()
         }
 
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun copyPasswordToClipboard(password: String?) {

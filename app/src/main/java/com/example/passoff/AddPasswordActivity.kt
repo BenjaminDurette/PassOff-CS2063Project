@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.MenuItem
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
@@ -32,6 +33,7 @@ class AddPasswordActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choose_add_password)
         this.title = "Add Password"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val generateOptionButton = findViewById<Button>(R.id.generateOptionButton)
         generateOptionButton.setOnClickListener {
@@ -41,6 +43,16 @@ class AddPasswordActivity : AppCompatActivity() {
         val customOptionButton = findViewById<Button>(R.id.customOptionButton)
         customOptionButton.setOnClickListener {
             addCustomPassword()
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
