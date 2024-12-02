@@ -72,7 +72,18 @@ class QuickshareActivity : AppCompatActivity() {
     private fun makeDeviceDiscoverable() {
         val discoverableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
         discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300)
-        startActivity(discoverableIntent)
+        startActivityForResult(discoverableIntent, REQUEST_DISCOVERABLE_BT)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_DISCOVERABLE_BT) {
+            if (resultCode == RESULT_CANCELED) {
+                Toast.makeText(this, "Discoverability request denied", Toast.LENGTH_SHORT).show()
+            } else {
+                startServer()
+            }
+        }
     }
 
     override fun onResume() {
@@ -144,23 +155,31 @@ class QuickshareActivity : AppCompatActivity() {
 
     inner class BluetoothConnectionThread(private val device: BluetoothDevice) : Thread() {
         private var socket: BluetoothSocket? = null
+        private val maxRetries = 3
 
         init {
             socket = device.createRfcommSocketToServiceRecord(UUID.randomUUID())
         }
 
         override fun run() {
-            try {
-                socket?.connect()
-                runOnUiThread {
-                    Toast.makeText(this@QuickshareActivity, "Connected to device: ${device.name}", Toast.LENGTH_SHORT).show()
+            var attempt = 0
+            while (attempt < maxRetries) {
+                try {
+                    socket?.connect()
+                    runOnUiThread {
+                        Toast.makeText(this@QuickshareActivity, "Connected to device: ${device.name}", Toast.LENGTH_SHORT).show()
+                    }
+                    manageConnectedSocket(socket!!)
+                    return
+                } catch (e: Exception) {
+                    attempt++
+                    if (attempt >= maxRetries) {
+                        runOnUiThread {
+                            Toast.makeText(this@QuickshareActivity, "Failed to connect to device: ${device.name}", Toast.LENGTH_SHORT).show()
+                        }
+                        cancel()
+                    }
                 }
-                manageConnectedSocket(socket!!)
-            } catch (e: Exception) {
-                runOnUiThread {
-                    Toast.makeText(this@QuickshareActivity, "Failed to connect to device: ${device.name}", Toast.LENGTH_SHORT).show()
-                }
-                cancel()
             }
         }
 
@@ -280,5 +299,9 @@ class QuickshareActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
         }
+    }
+
+    companion object {
+        private const val REQUEST_DISCOVERABLE_BT = 1
     }
 }
