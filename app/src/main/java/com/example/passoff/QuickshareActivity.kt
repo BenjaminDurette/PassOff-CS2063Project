@@ -191,7 +191,7 @@ class QuickshareActivity : AppCompatActivity() {
                     Log.d("manageConnectedSocket", e.message ?: "No message")
                     attempt++
                     if (attempt >= maxRetries) {
-                        logConnectionNonServerDuration(SystemClock.currentThreadTimeMillis() - connectionStartTime)
+                        logConnectionDuration("From NonServer Run, attempts> max retries", SystemClock.currentThreadTimeMillis() - connectionStartTime)
                         runOnUiThread {
                             Toast.makeText(this@QuickshareActivity, "Failed to connect to device: ${device.name}", Toast.LENGTH_SHORT).show()
                         }
@@ -228,7 +228,7 @@ class QuickshareActivity : AppCompatActivity() {
                         sendAcknowledgment(false)
                     }
                 } catch (e: Exception) {
-                    logConnectionNonServerDuration(SystemClock.currentThreadTimeMillis() - connectionStartTime)
+                    logConnectionDuration("From NonServer MCS, Exception: ${e.message}", SystemClock.currentThreadTimeMillis() - connectionStartTime)
                     Log.d("manageConnectedSocket", e.message ?: "No message")
                     break
                 }
@@ -256,7 +256,7 @@ class QuickshareActivity : AppCompatActivity() {
         fun cancel() {
             try {
                 socket?.close()
-                logConnectionNonServerDuration(SystemClock.currentThreadTimeMillis() - connectionStartTime)
+                logConnectionDuration("From NonServer Cancel", SystemClock.currentThreadTimeMillis() - connectionStartTime)
                 runOnUiThread {
                     Toast.makeText(this@QuickshareActivity, "Connection closed.", Toast.LENGTH_SHORT).show()
                 }
@@ -283,7 +283,7 @@ class QuickshareActivity : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                logConnectionServerDuration(SystemClock.currentThreadTimeMillis() - connectionStartTime)
+                logConnectionDuration("From Server Run, Exception: ${e.message}", SystemClock.currentThreadTimeMillis() - connectionStartTime)
                 Log.e("BluetoothServerThread", "Error accepting connection: ${e.message}")
             }
         }
@@ -314,7 +314,7 @@ class QuickshareActivity : AppCompatActivity() {
                         sendAcknowledgment(false)
                     }
                 } catch (e: Exception) {
-                    logConnectionServerDuration(SystemClock.currentThreadTimeMillis() - connectionStartTime)
+                    logConnectionDuration("From Server MCS, Excpetion: ${e.message}", SystemClock.currentThreadTimeMillis() - connectionStartTime)
                     Log.d("manageConnectedSocket", e.message ?: "No message")
                     break
                 }
@@ -332,7 +332,7 @@ class QuickshareActivity : AppCompatActivity() {
         fun cancel() {
             try {
                 serverSocket?.close()
-                logConnectionServerDuration(SystemClock.currentThreadTimeMillis() - connectionStartTime)
+                logConnectionDuration("From Server Cancel", SystemClock.currentThreadTimeMillis() - connectionStartTime)
                 runOnUiThread {
                     Toast.makeText(this@QuickshareActivity, "Server connection closed.", Toast.LENGTH_SHORT).show()
                 }
@@ -343,11 +343,7 @@ class QuickshareActivity : AppCompatActivity() {
         }
     }
 
-    fun logConnectionServerDuration(time: Long){
-        Log.d("Connection Duration", "Connection duration: $time ms")
-    }
-
-    fun logConnectionNonServerDuration(time: Long){
+    fun logConnectionDuration(tag: String, time: Long){
         Log.d("Connection Duration", "Connection duration: $time ms")
     }
 
