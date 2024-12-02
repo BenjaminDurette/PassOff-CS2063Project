@@ -17,6 +17,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.hide()
 
         val userDBHandler = UserDBHandler(this)
         val logins = userDBHandler.getAllLogins()
