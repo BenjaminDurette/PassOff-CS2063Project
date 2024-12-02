@@ -44,6 +44,20 @@ class DBHandler (context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, D
         return true
     }
 
+    fun updatePassword(id: Int, entryName: String?, username: String?, password: String?, url: String?): Boolean {
+        val db = this.writableDatabase
+        val values = ContentValues()
+        values.put(ENTRYNAME_COL, entryName)
+        values.put(USERNAME_COL, username)
+        values.put(PASSWORD_COL, password)
+        values.put(DESCRIPTION_COL, url)
+
+        db.update(TABLE_NAME, values, "$ID_COL=?", arrayOf(id.toString()))
+        db.close()
+        return true
+    }
+
+
     fun getPasswords(): ArrayList<PassItem> {
         val db = this.readableDatabase
         val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME", null)

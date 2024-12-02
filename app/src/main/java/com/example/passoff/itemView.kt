@@ -99,6 +99,55 @@ class itemView : AppCompatActivity() {
                 Toast.makeText(this, "Bluetooth permissions are required", Toast.LENGTH_LONG).show()
             }
         }
+
+        val editButton = findViewById<Button>(R.id.edit_button)
+        editButton.setOnClickListener {
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_edit, null)
+            val dialog = AlertDialog.Builder(this)
+                .setTitle("Enter New Values")
+                .setMessage("Any fields left blank will remain the same.")
+                .setView(dialogView)
+                .setPositiveButton("Update") { dialog, _ ->
+                    var newName = dialogView.findViewById<TextView>(R.id.item_name).text.toString()
+                    var newUsername = dialogView.findViewById<TextView>(R.id.item_username).text.toString()
+                    var newPassword = dialogView.findViewById<TextView>(R.id.item_password).text.toString()
+                    var newDomain = dialogView.findViewById<TextView>(R.id.item_domain).text.toString()
+                    if (newName.isEmpty()) {
+                        newName = itemName.toString()
+                    }
+                    if (newUsername.isEmpty()) {
+                        newUsername = username.toString()
+                    }
+                    if (newPassword.isEmpty()) {
+                        newPassword = password.toString()
+                    }
+                    if (newDomain.isEmpty()) {
+                        newDomain = domain.toString()
+                    }
+
+                    val dbHandler = DBHandler(this)
+                    val success = dbHandler.updatePassword(
+                        this.intent.getIntExtra("id", -1),
+                        newName,
+                        newUsername,
+                        newPassword,
+                        newDomain)
+                    if (success) {
+                        Toast.makeText(this, "Password updated successfully", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this, "Failed to update password", Toast.LENGTH_SHORT).show()
+                    }
+
+                    dialog.dismiss()
+                    finish()
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.cancel()
+                }
+                .create()
+            dialog.show()
+        }
+
     }
 
     private fun copyPasswordToClipboard(password: String?) {

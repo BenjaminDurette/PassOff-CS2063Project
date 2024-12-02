@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="10dp">
+>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -21,14 +20,14 @@
             android:textSize="16sp"
             android:text="Name:"/>
 
-        <TextView
+        <EditText
             android:id="@+id/item_name"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="end"
             android:padding="10dp"
             android:textSize="16sp"
-            android:text="Item Name"/>
+            android:hint="Item Name"/>
 
     </androidx.cardview.widget.CardView>
 
@@ -47,14 +46,14 @@
             android:textSize="16sp"
             android:text="Username:"/>
 
-        <TextView
+        <EditText
             android:id="@+id/item_username"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center|end"
             android:padding="10dp"
             android:textSize="16sp"
-            android:text="Username"/>
+            android:hint="Username"/>
 
     </androidx.cardview.widget.CardView>
 
@@ -73,14 +72,14 @@
             android:textSize="16sp"
             android:text="Password:"/>
 
-        <TextView
+        <EditText
             android:id="@+id/item_password"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center|end"
             android:padding="10dp"
             android:textSize="16sp"
-            android:text="Password"/>
+            android:hint="Password"/>
 
     </androidx.cardview.widget.CardView>
 
@@ -99,50 +98,15 @@
             android:textSize="16sp"
             android:text="Domain:"/>
 
-        <TextView
+        <EditText
             android:id="@+id/item_domain"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center|end"
             android:padding="10dp"
             android:textSize="16sp"
-            android:text="Domain"/>
+            android:hint="Domain"/>
 
     </androidx.cardview.widget.CardView>
 
-    <Button
-        android:id="@+id/copy_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#8BC34A"
-        android:layout_marginTop="10dp"
-        android:text="COPY PASSWORD"/>
-
-    <Button
-        android:id="@+id/quickshare_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#3F51B5"
-        android:layout_marginTop="10dp"
-        android:text="Quickshare"/>
-
-    <Button
-        android:id="@+id/delete_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#B80404"
-        android:layout_marginTop="10dp"
-        android:text="Delete Password"/>
-
-    <Button
-        android:id="@+id/edit_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:backgroundTint="#FFEB3B"
-        android:text="Edit Fields" />
-
 </LinearLayout>
-
-
-
