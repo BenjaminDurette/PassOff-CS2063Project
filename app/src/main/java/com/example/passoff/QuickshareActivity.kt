@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.passoff.databinding.ActivityQuickshareBinding
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.*
@@ -86,21 +87,31 @@ class QuickshareActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
         registerReceiver(deviceReceiver, IntentFilter(BluetoothDevice.ACTION_FOUND))
         registerReceiver(deviceReceiver, IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED))
+        registerReceiver(deviceReceiver, IntentFilter(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED))
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onStop() {
+        super.onStop()
         unregisterReceiver(deviceReceiver)
         stopDiscovery()
         connectionThread?.cancel()
         serverThread?.cancel()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        connectionThread?.cancel()
+        serverThread?.cancel()
+    }
+
     private fun startDiscovery() {
+        if (bluetoothAdapter?.isDiscovering == true) {
+            bluetoothAdapter.cancelDiscovery()
+        }
         bluetoothAdapter?.startDiscovery()
         Toast.makeText(this, "Starting Bluetooth discovery...", Toast.LENGTH_SHORT).show()
     }
@@ -117,6 +128,7 @@ class QuickshareActivity : AppCompatActivity() {
     }
 
     private fun connectToDevice(device: BluetoothDevice) {
+        bluetoothAdapter?.cancelDiscovery()
         connectionThread = BluetoothConnectionThread(device)
         connectionThread?.start()
         Toast.makeText(this, "Connecting to device: ${device.name}", Toast.LENGTH_SHORT).show()
@@ -158,7 +170,7 @@ class QuickshareActivity : AppCompatActivity() {
         private val maxRetries = 3
 
         init {
-            socket = device.createRfcommSocketToServiceRecord(UUID.randomUUID())
+            socket = device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"))
         }
 
         override fun run() {
@@ -172,7 +184,7 @@ class QuickshareActivity : AppCompatActivity() {
                     }
                     manageConnectedSocket(socket!!)
                     return
-                } catch (e: Exception) {
+                } catch (e: IOException) {
                     Log.d("manageConnectedSocket", e.message ?: "No message")
                     attempt++
                     if (attempt >= maxRetries) {
@@ -180,6 +192,7 @@ class QuickshareActivity : AppCompatActivity() {
                             Toast.makeText(this@QuickshareActivity, "Failed to connect to device: ${device.name}", Toast.LENGTH_SHORT).show()
                         }
                         cancel()
+                        return;
                     }
                 }
             }
@@ -195,11 +208,14 @@ class QuickshareActivity : AppCompatActivity() {
 
             while (true) {
                 try {
+                    Thread.sleep(100)
                     bytes = inputStream.read(buffer)
+                    if (bytes == -1) break
                     Log.d("manageConnectedSocket", "After inputStream.read")
                     val receivedMessage = String(buffer, 0, bytes)
                     Log.d("manageConnectedSocket", "After String buffer")
                     if (receivedMessage == matchCode) {
+                        Thread.sleep(100)
                         sendEncryptedMessage(passwordToSend ?: "")
                         Log.d("manageConnectedSocket", "After send encrypted")
                         Toast.makeText(this@QuickshareActivity, "Match code received, sending encrypted message.", Toast.LENGTH_SHORT).show()
@@ -246,7 +262,7 @@ class QuickshareActivity : AppCompatActivity() {
     }
 
     inner class BluetoothServerThread : Thread() {
-        private val uuid: UUID = UUID.randomUUID()
+        private val uuid: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
         private val serverSocket = bluetoothAdapter?.listenUsingRfcommWithServiceRecord("BluetoothPassOff", uuid)
 
         override fun run() {
@@ -272,10 +288,12 @@ class QuickshareActivity : AppCompatActivity() {
             while (true) {
                 try {
                     bytes = inputStream.read(buffer)
+                    if (bytes == -1) break
                     val receivedMessage = String(buffer, 0, bytes)
                     if (receivedMessage == matchCode) {
                         sendAcknowledgment(true)
                         bytes = inputStream.read(buffer)
+                        if (bytes == -1) break
                         val receivedEncryptedMessage = String(buffer, 0, bytes)
                         val decryptedMessage = decryptMessage(receivedEncryptedMessage, matchCode ?: "")
                         runOnUiThread {
