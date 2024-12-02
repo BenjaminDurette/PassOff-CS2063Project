@@ -54,15 +54,15 @@ class QuickshareActivity : AppCompatActivity() {
             }
 
             // Check if Bluetooth is enabled, then proceed with app logic
-            Log.i("tag", "Bluetooth Adapter: $bluetoothAdapter")
-            Log.i("tag", "Bluetooth Adapter Enabled: ${bluetoothAdapter?.isEnabled}")
-            if (bluetoothAdapter.isEnabled()) {
+            if (bluetoothAdapter?.isEnabled == true) {
                 // Bluetooth is enabled, start the Bluetooth connection logic based on sender/receiver mode
                 if (isSenderMode) {
                     connectionThread = BluetoothConnectionThread()
                     connectionThread?.start()
+                    Toast.makeText(this, "Connection thread started.", Toast.LENGTH_SHORT).show()
                 } else {
                     startBluetoothServer()
+                    Toast.makeText(this, "Bluetooth server started", Toast.LENGTH_SHORT).show()
                 }
             } else {
                 // Bluetooth is disabled, show a toast message
@@ -90,7 +90,6 @@ class QuickshareActivity : AppCompatActivity() {
         stopBluetoothServer()
         connectionThread?.cancel()
     }
-
 
     // Start the Bluetooth server (Receiver)
     private fun startBluetoothServer() {
@@ -152,6 +151,7 @@ class QuickshareActivity : AppCompatActivity() {
                         val decryptedMessage = decryptMessage(receivedEncryptedMessage, matchCode ?: "")
                         runOnUiThread {
                             binding.sharedPasswordText.text = "Received message: $decryptedMessage"
+                            binding.sharedPasswordText.visibility = android.view.View.VISIBLE
                         }
                     } else {
                         sendAcknowledgment(false)
@@ -183,9 +183,18 @@ class QuickshareActivity : AppCompatActivity() {
 
         @SuppressLint("MissingPermission")
         override fun run() {
-            socket?.connect()
-            socket?.let {
-                manageConnectedSocket(it)
+            try {
+                socket?.connect()
+                runOnUiThread {
+                    Toast.makeText(this@QuickshareActivity, "Connected to device: ${device?.name}", Toast.LENGTH_SHORT).show()
+                }
+                socket?.let {
+                    manageConnectedSocket(it)
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    Toast.makeText(this@QuickshareActivity, "Failed to connect to device: ${device?.name}", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
