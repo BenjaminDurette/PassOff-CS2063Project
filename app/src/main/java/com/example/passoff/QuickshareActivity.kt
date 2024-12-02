@@ -18,7 +18,6 @@ import java.io.OutputStream
 import java.util.*
 
 class QuickshareActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityQuickshareBinding
     private val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
     private var isSenderMode = false
@@ -60,10 +59,18 @@ class QuickshareActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            if (bluetoothAdapter?.isEnabled == false) {
-                enableBluetooth()
+            // Check if Bluetooth is enabled, then proceed with app logic
+            if (bluetoothAdapter?.isEnabled == true) {
+                // Bluetooth is enabled, start the Bluetooth connection logic based on sender/receiver mode
+                if (isSenderMode) {
+                    connectionThread = BluetoothConnectionThread()
+                    connectionThread?.start()
+                } else {
+                    startBluetoothServer()
+                }
             } else {
-                disableBluetooth()
+                // Bluetooth is disabled, show a toast message
+                Toast.makeText(this, "Bluetooth is disabled. Please enable Bluetooth to use this feature.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -123,20 +130,6 @@ class QuickshareActivity : AppCompatActivity() {
                 finish()
             }
         }
-    }
-
-    // Enable Bluetooth
-    @SuppressLint("MissingPermission")
-    private fun enableBluetooth() {
-        val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-        startActivityForResult(enableBtIntent, 1)
-    }
-
-    // Disable Bluetooth
-    @SuppressLint("MissingPermission")
-    private fun disableBluetooth() {
-        bluetoothAdapter?.disable()
-        Toast.makeText(this, "Bluetooth Disabled", Toast.LENGTH_SHORT).show()
     }
 
     // Start the Bluetooth server (Receiver)

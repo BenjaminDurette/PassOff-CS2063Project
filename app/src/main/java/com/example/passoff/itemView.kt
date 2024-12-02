@@ -103,10 +103,15 @@ class itemView : AppCompatActivity() {
 
             // Decrypt button click listener
             quickshareButton.setOnClickListener {
-                val intent = Intent(this, QuickshareActivity::class.java)
-                intent.putExtra("isSenderMode", true)
-                    .putExtra("passwordToSend", password)
-                startActivity(intent)
+                if (BluetoothUtils.areBluetoothPermissionsGranted(this)) {
+                    // If Bluetooth permissions are available, start the QuickshareActivity
+                    val intent = Intent(this, QuickshareActivity::class.java)
+                    intent.putExtra("isSenderMode", false)
+                    startActivity(intent)
+                } else {
+                    // If Bluetooth permissions are not available, show a Toast message
+                    Toast.makeText(this, "Bluetooth permissions are required", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }

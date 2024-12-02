@@ -89,9 +89,16 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.navigation_quickshare -> {
                     Toast.makeText(this, "Quickshare selected", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this, QuickshareActivity::class.java)
-                    intent.putExtra("isSenderMode", false)
-                    startActivity(intent)
+                    // Check if Bluetooth permissions are granted and request them if not
+                    if (BluetoothUtils.areBluetoothPermissionsGranted(this)) {
+                        // If Bluetooth permissions are available, start the QuickshareActivity
+                        val intent = Intent(this, QuickshareActivity::class.java)
+                        intent.putExtra("isSenderMode", false)
+                        startActivity(intent)
+                    } else {
+                        // If Bluetooth permissions are not available, show a Toast message
+                        Toast.makeText(this, "Bluetooth permissions are required", Toast.LENGTH_LONG).show()
+                    }
                     true
                 }
                 else -> false
