@@ -6,11 +6,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class PasswordAdapter(private val passwordList: ArrayList<DBHandler.PassItem>) :
+class PasswordAdapter(private val passwordList: ArrayList<PassItem>) :
     RecyclerView.Adapter<PasswordAdapter.PasswordViewHolder>() {
 
     class PasswordViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val titleTextView: TextView = itemView.findViewById(R.id.item_title)
+        val titleTextView: TextView = itemView.findViewById(R.id.item_name)
         val usernameTextView: TextView = itemView.findViewById(R.id.item_username)
         val passwordTextView: TextView = itemView.findViewById(R.id.item_password)
         val domainTextView: TextView = itemView.findViewById(R.id.item_domain)

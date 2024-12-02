@@ -26,7 +26,7 @@ class itemView : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_detail)
+        setContentView(R.layout.password_detail)
 
         // Generate the secret key
         secretKey = generateKey()
