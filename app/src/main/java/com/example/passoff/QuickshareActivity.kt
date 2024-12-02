@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothSocket
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -25,8 +26,6 @@ class QuickshareActivity : AppCompatActivity() {
     private var passwordToSend: String? = null
     private var connectionThread: BluetoothConnectionThread? = null
 
-    private val REQUEST_BLUETOOTH_PERMISSIONS = 1
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityQuickshareBinding.inflate(layoutInflater)
@@ -37,11 +36,6 @@ class QuickshareActivity : AppCompatActivity() {
             Toast.makeText(this, "Bluetooth not supported on this device", Toast.LENGTH_SHORT).show()
             finish()
             return
-        }
-
-        // Check and request Bluetooth permissions
-        if (!hasBluetoothPermissions()) {
-            requestBluetoothPermissions()
         }
 
         // Setup mode and password to send
@@ -60,7 +54,9 @@ class QuickshareActivity : AppCompatActivity() {
             }
 
             // Check if Bluetooth is enabled, then proceed with app logic
-            if (bluetoothAdapter?.isEnabled == true) {
+            Log.i("tag", "Bluetooth Adapter: $bluetoothAdapter")
+            Log.i("tag", "Bluetooth Adapter Enabled: ${bluetoothAdapter?.isEnabled}")
+            if (bluetoothAdapter.isEnabled()) {
                 // Bluetooth is enabled, start the Bluetooth connection logic based on sender/receiver mode
                 if (isSenderMode) {
                     connectionThread = BluetoothConnectionThread()
@@ -95,42 +91,6 @@ class QuickshareActivity : AppCompatActivity() {
         connectionThread?.cancel()
     }
 
-    // Check if Bluetooth permissions are granted
-    private fun hasBluetoothPermissions(): Boolean {
-        val permissions = arrayOf(
-            Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.BLUETOOTH_CONNECT,
-            Manifest.permission.BLUETOOTH_SCAN
-        )
-        return permissions.all { permission ->
-            ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
-        }
-    }
-
-    // Request Bluetooth permissions
-    private fun requestBluetoothPermissions() {
-        val permissions = arrayOf(
-            Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.BLUETOOTH_CONNECT,
-            Manifest.permission.BLUETOOTH_SCAN
-        )
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_BLUETOOTH_PERMISSIONS)
-    }
-
-    // Handle Bluetooth permissions result
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_BLUETOOTH_PERMISSIONS) {
-            if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                Toast.makeText(this, "Bluetooth permissions granted", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Bluetooth permissions are required for this app", Toast.LENGTH_SHORT).show()
-                finish()
-            }
-        }
-    }
 
     // Start the Bluetooth server (Receiver)
     private fun startBluetoothServer() {
