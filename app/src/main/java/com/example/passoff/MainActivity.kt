@@ -1,70 +1,103 @@
 package com.example.passoff
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.widget.Button
-import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var passwordAdapter: PasswordAdapter
     private var dbHandler: DBHandler? = null
+    private val ADD_PASSWORD_REQUEST_CODE = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
-        val addPasswordButton = findViewById<Button>(R.id.addpassword_button)
-        addPasswordButton.setOnClickListener    {
-            addPasswordDialogue()
+        val sharedPreferences = getSharedPreferences("MyApp", Context.MODE_PRIVATE)
+        val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
+
+        if (!isLoggedIn) {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+            return
         }
 
+        setContentView(R.layout.activity_main)
+        supportActionBar?.hide()
+
+        val addPasswordButton = findViewById<Button>(R.id.addpassword_button)
+        addPasswordButton.setOnClickListener {
+            val intent = Intent(this, AddPasswordActivity::class.java)
+            startActivityForResult(intent, ADD_PASSWORD_REQUEST_CODE)
+        }
+
+        val settingsButton = findViewById<ImageButton>(R.id.settingsButton)
+        settingsButton.setOnClickListener {
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
+        }
+
+        recyclerView = findViewById(R.id.recyclerView)
+        progressIndicator = findViewById(R.id.circularProgressIndicator)
+
+        loadData()
     }
 
-    private fun addPasswordDialogue() {
-        // Inflate the custom layout that contains multiple EditText fields
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_input, null)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == ADD_PASSWORD_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            data?.let {
+                val title = it.getStringExtra("title")
+                val username = it.getStringExtra("username")
+                val password = it.getStringExtra("password")
+                val domain = it.getStringExtra("domain")
 
-        // Create references to the input fields in the custom layout
-        val titleEditText = dialogView.findViewById<EditText>(R.id.titleEditText)
-        val usernameEditText = dialogView.findViewById<EditText>(R.id.usernameEditText)
-        val passwordEditText = dialogView.findViewById<EditText>(R.id.passwordEditText)
-        val domainEditText = dialogView.findViewById<EditText>(R.id.domainEditText)
-
-        // Build the AlertDialog
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("Enter New Password Information")
-            .setView(dialogView)  // Set the custom layout in the dialog
-            .setPositiveButton("Submit") { dialog, _ ->
-                // Retrieve user input from the EditText fields
-                val title = titleEditText.text.toString()
-                val username = usernameEditText.text.toString()
-                val password = passwordEditText.text.toString()
-                val domain = domainEditText.text.toString()
-
-                // Show a toast or handle the data
-                dbHandler = DBHandler(this)
-                this.dbHandler!!.addNewPassword(title, username, password, domain)
-
-                dialog.dismiss()  // Close the dialog
-
-                Toast.makeText(this, "Password has been added.", Toast.LENGTH_SHORT).show()
+                if (title != null && username != null && password != null && domain != null) {
+                    dbHandler = DBHandler(this)
+                    dbHandler!!.addNewPassword(title, username, password, domain)
+                    Toast.makeText(this, "Password has been added.", Toast.LENGTH_SHORT).show()
+                    loadData()
+                }
             }
-            .setNegativeButton("Cancel") { dialog, _ ->
-                dialog.cancel()  // Close the dialog without doing anything
-            }
-            .create()
+        }
+    }
 
-        // Show the dialog
-        dialog.show()
+    private fun loadData() {
+        val loadDataTask = LoadDataTask(this)
+        loadDataTask.setRecyclerView(recyclerView)
+        loadDataTask.setCircularProgressIndicator(progressIndicator)
+        loadDataTask.execute()
+
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        bottomNavigationView.setOnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.navigation_home -> {
+                    Toast.makeText(this, "Home selected", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                R.id.navigation_search -> {
+                    Toast.makeText(this, "Search selected", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                R.id.navigation_quickshare -> {
+                    Toast.makeText(this, "Quickshare selected", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    companion object {
+        lateinit var progressIndicator: CircularProgressIndicator
+        lateinit var recyclerView: RecyclerView
     }
 }
