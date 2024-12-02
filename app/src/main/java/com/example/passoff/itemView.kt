@@ -8,12 +8,14 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
 import android.util.Base64
+import android.util.Patterns
 import android.view.MenuItem
 import android.widget.Button
 import android.widget.ImageButton
@@ -54,6 +56,11 @@ class itemView : AppCompatActivity() {
         val passwordText = findViewById<TextView>(R.id.item_password)
         passwordText.text = password
 
+        val domainText = findViewById<TextView>(R.id.item_domain)
+        domainText.text = domain
+
+        this.title = itemName
+
         val showPasswordButton = findViewById<ImageButton>(R.id.show_password)
         var isPasswordVisible = false
         showPasswordButton.setOnClickListener {
@@ -66,10 +73,16 @@ class itemView : AppCompatActivity() {
             isPasswordVisible = !isPasswordVisible
         }
 
-        val domainText = findViewById<TextView>(R.id.item_domain)
-        domainText.text = domain
-
-        this.title = itemName
+        val launchURLButton = findViewById<ImageButton>(R.id.launch_url)
+        launchURLButton.setOnClickListener {
+            if (Patterns.WEB_URL.matcher(domainText.text.toString()).matches()) {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(domainText.text.toString()))
+                startActivity(intent)
+            }
+            else{
+                Toast.makeText(this, "Invalid URL", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         val copyName = findViewById<ImageButton>(R.id.copy_name)
         copyName.setOnClickListener {
