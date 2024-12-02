@@ -86,6 +86,17 @@
         android:layout_height="wrap_content"
         android:backgroundTint="#B80404"
         android:text="Delete Password" />
+    <Button
+        android:id="@+id/quickshare_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:drawable="@android:drawable/ic_menu_delete"
+        android:drawablePadding="8dp"
+        android:focusable="false"
+        android:padding="8dp"
+        android:text="Quickshare"
+        android:visibility="visible" />
 
 </LinearLayout>
 

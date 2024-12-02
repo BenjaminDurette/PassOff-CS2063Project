@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Base64
@@ -84,6 +85,7 @@ class itemView : AppCompatActivity() {
             val encryptLabel = findViewById<TextView>(R.id.encrypted_text)
             val encryptButton = findViewById<Button>(R.id.encrypt_button)
             val decryptButton = findViewById<Button>(R.id.decrypt_button)
+            val quickshareButton = findViewById<Button>(R.id.quickshare_button)
 
             encryptButton.setOnClickListener {
                 if (password != null) {
@@ -97,6 +99,14 @@ class itemView : AppCompatActivity() {
                 val encryptedText = encryptLabel.text.toString().removePrefix("Encryption Text: ")
                 val decryptedText = decrypt(encryptedText)
                 encryptLabel.text = "Decryption Text: $decryptedText"
+            }
+
+            // Decrypt button click listener
+            quickshareButton.setOnClickListener {
+                val intent = Intent(this, QuickshareActivity::class.java)
+                intent.putExtra("isSenderMode", true)
+                    .putExtra("passwordToSend", password)
+                startActivity(intent)
             }
         }
     }

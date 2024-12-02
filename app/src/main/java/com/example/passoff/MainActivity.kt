@@ -89,6 +89,9 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.navigation_quickshare -> {
                     Toast.makeText(this, "Quickshare selected", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this, QuickshareActivity::class.java)
+                    intent.putExtra("isSenderMode", false)
+                    startActivity(intent)
                     true
                 }
                 else -> false
