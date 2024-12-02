@@ -163,12 +163,22 @@ class itemView : AppCompatActivity() {
                         newPassword,
                         newDomain)
                     if (success) {
-                        Toast.makeText(this, "Password updated successfully", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Item updated successfully", Toast.LENGTH_SHORT).show()
                     } else {
-                        Toast.makeText(this, "Failed to update password", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Failed to update item", Toast.LENGTH_SHORT).show()
                     }
 
                     dialog.dismiss()
+
+                    //restartActivity
+                    val intent = Intent(this, itemView::class.java)
+                    val item = dbHandler.getPassword(this.intent.getIntExtra("id", -1))
+                    intent.putExtra("itemName", item!!.name)
+                    intent.putExtra("username", item.username)
+                    intent.putExtra("password", item.password)
+                    intent.putExtra("domain", item.domain)
+                    intent.putExtra("id", item.id)
+                    startActivity(intent)
                     finish()
                 }
                 .setNegativeButton("Cancel") { dialog, _ ->

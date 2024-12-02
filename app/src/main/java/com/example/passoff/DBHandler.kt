@@ -64,6 +64,23 @@ class DBHandler (context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, D
         return true
     }
 
+    fun getPassword(id: Int): PassItem? {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME WHERE $ID_COL=?", arrayOf(id.toString()))
+        var passItem: PassItem? = null
+        if (cursor.moveToFirst()) {
+            val id = cursor.getInt(cursor.getColumnIndexOrThrow(ID_COL))
+            val title = cursor.getString(cursor.getColumnIndexOrThrow(ENTRYNAME_COL))
+            val username = cursor.getString(cursor.getColumnIndexOrThrow(USERNAME_COL))
+            val password = cursor.getString(cursor.getColumnIndexOrThrow(PASSWORD_COL))
+            val domain = cursor.getString(cursor.getColumnIndexOrThrow(DESCRIPTION_COL))
+
+            passItem = PassItem(id, title, username, password, domain)
+        }
+        cursor.close()
+        db.close()
+        return passItem
+    }
 
     fun getPasswords(): ArrayList<PassItem> {
         val db = this.readableDatabase
