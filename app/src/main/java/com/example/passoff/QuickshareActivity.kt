@@ -344,7 +344,7 @@ class QuickshareActivity : AppCompatActivity() {
     }
 
     fun logConnectionDuration(tag: String, time: Long){
-        Log.d("Connection Duration", "Connection duration: $time ms")
+        Log.d("Connection Duration", "${tag}\nConnection duration: $time ms")
     }
 
     companion object {
