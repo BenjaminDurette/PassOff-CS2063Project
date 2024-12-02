@@ -45,11 +45,22 @@ class LoadDataTask(private val activity: AppCompatActivity) {
         }
     }
 
+    fun updateData(newItems: ArrayList<PassItem>) {
+        activity.runOnUiThread {
+            circularProgressIndicator.visibility = ProgressBar.VISIBLE
+        }
+
+        Executors.newSingleThreadExecutor().execute {
+            Handler(Looper.getMainLooper()).post {
+                updateDisplay(newItems)
+            }
+        }
+    }
+
     private fun updateDisplay(newItems: ArrayList<PassItem>) {
         setupRecyclerView(newItems)
         circularProgressIndicator.visibility = ProgressBar.INVISIBLE
-        Toast.makeText(appContext, "Data loaded successfully", Toast.LENGTH_SHORT).show()
-
+        //Toast.makeText(appContext, "Data loaded successfully", Toast.LENGTH_SHORT).show()
     }
 
     private fun setupRecyclerView(newItems: ArrayList<PassItem>) {

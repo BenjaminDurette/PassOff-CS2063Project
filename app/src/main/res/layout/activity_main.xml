@@ -80,6 +80,7 @@
         android:id="@+id/appTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="sans-serif"
         android:text="PassOff"
         android:textSize="48sp"
         android:translationX="75dp"

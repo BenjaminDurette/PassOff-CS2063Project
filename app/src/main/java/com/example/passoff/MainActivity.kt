@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.progressindicator.CircularProgressIndicator
+import androidx.appcompat.widget.SearchView
 
 class MainActivity : AppCompatActivity() {
 
@@ -47,6 +48,24 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
         }
+
+        val searchBar = findViewById<SearchView>(R.id.searchView)
+        searchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                dbHandler = DBHandler(this@MainActivity)
+                val newItems = dbHandler!!.searchPasswords(newText)
+                val loadDataTask = LoadDataTask(this@MainActivity)
+                loadDataTask.setRecyclerView(recyclerView)
+                loadDataTask.setCircularProgressIndicator(progressIndicator)
+                loadDataTask.updateData(newItems)
+                return false
+            }
+        })
 
         recyclerView = findViewById(R.id.recyclerView)
         progressIndicator = findViewById(R.id.circularProgressIndicator)
