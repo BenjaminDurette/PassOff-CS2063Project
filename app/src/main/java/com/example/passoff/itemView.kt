@@ -8,12 +8,14 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Base64
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -25,6 +27,7 @@ class itemView : AppCompatActivity() {
     private val TRANSFORMATION = "AES/ECB/PKCS5Padding"
     private lateinit var secretKey: SecretKey
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.password_detail)
@@ -103,10 +106,15 @@ class itemView : AppCompatActivity() {
 
             // Decrypt button click listener
             quickshareButton.setOnClickListener {
-                val intent = Intent(this, QuickshareActivity::class.java)
-                intent.putExtra("isSenderMode", true)
-                    .putExtra("passwordToSend", password)
-                startActivity(intent)
+                if (BluetoothUtils.areBluetoothPermissionsGranted(this)) {
+                    // If Bluetooth permissions are available, start the QuickshareActivity
+                    val intent = Intent(this, QuickshareActivity::class.java)
+                    intent.putExtra("isSenderMode", false)
+                    startActivity(intent)
+                } else {
+                    // If Bluetooth permissions are not available, show a Toast message
+                    Toast.makeText(this, "Bluetooth permissions are required", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
