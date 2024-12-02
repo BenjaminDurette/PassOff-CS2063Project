@@ -52,5 +52,16 @@
         android:text="Password shared successfully!"
         android:visibility="gone"
         android:layout_marginTop="16dp" />
+    <Button
+        android:id="@+id/copyPassword_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:drawable="@android:drawable/ic_menu_delete"
+        android:drawablePadding="8dp"
+        android:focusable="false"
+        android:padding="8dp"
+        android:text="Copy Password"
+        android:visibility="gone" />
 
 </LinearLayout>

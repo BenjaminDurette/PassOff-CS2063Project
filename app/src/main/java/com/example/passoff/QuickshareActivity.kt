@@ -6,6 +6,8 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.BroadcastReceiver
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -33,6 +35,7 @@ class QuickshareActivity : AppCompatActivity() {
     private var connectionThread: BluetoothConnectionThread? = null
     private var serverThread: BluetoothServerThread? = null
     private val deviceReceiver = DeviceReceiver()
+    private var sharedPassword: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,6 +70,24 @@ class QuickshareActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this, "Bluetooth is disabled. Please enable Bluetooth to use this feature.", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        binding.copyPasswordButton.setOnClickListener {
+            copyPasswordToClipboard(sharedPassword)
+        }
+    }
+
+    private fun copyPasswordToClipboard(password: String?) {
+        if (password != null) {
+            // Get the ClipboardManager
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            // Create a ClipData object
+            val clip = ClipData.newPlainText("Password", password)
+            // Set the clip
+            clipboard.setPrimaryClip(clip)
+
+            // Show a toast message to inform the user
+            Toast.makeText(this, "Password copied to clipboard", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -208,6 +229,26 @@ class QuickshareActivity : AppCompatActivity() {
                     if (receivedMessage == matchCode) {
                         Thread.sleep(100)
                         sendEncryptedMessage(passwordToSend ?: "")
+                        bytes = inputStream.read(buffer)
+
+                        val receivedAcknowledgement = String(buffer, 0, bytes)
+                        if (receivedAcknowledgement == "MATCH_FAILED") {
+                            runOnUiThread {
+                                Toast.makeText(
+                                    this@QuickshareActivity,
+                                    "Failed to share password",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }else{
+                            runOnUiThread {
+                                Toast.makeText(
+                                    this@QuickshareActivity,
+                                    "Password shared successfully!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
                     } else {
                         sendAcknowledgment(false)
                     }
@@ -280,9 +321,11 @@ class QuickshareActivity : AppCompatActivity() {
                         }
                     }
                     val decryptedMessage = decryptMessage(receivedMessage, matchCode ?: "")
+                    sharedPassword = decryptedMessage
                     runOnUiThread {
-                        binding.sharedPasswordText.text = "Received message: $decryptedMessage"
+                        binding.sharedPasswordText.text = "Received message: $sharedPassword"
                         binding.sharedPasswordText.visibility = android.view.View.VISIBLE
+                        binding.copyPasswordButton.visibility = android.view.View.VISIBLE
                     }
                      sendAcknowledgment(true)
                 } catch (e: Exception) {
