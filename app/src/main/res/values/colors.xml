@@ -11,4 +11,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="grey">#FF808080</color>
+    <color name="weak">#FF0000</color> <!-- Red -->
+    <color name="medium">#FFA500</color> <!-- Orange -->
+    <color name="strong">#008000</color> <!-- Green -->
 </resources>
