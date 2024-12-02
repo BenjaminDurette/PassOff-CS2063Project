@@ -218,6 +218,8 @@ class QuickshareActivity : AppCompatActivity() {
                     bytes = inputStream.read(buffer)
                     Log.d("manageConnectedSocket", "Sender After inputStream.read")
                     val receivedMessage = String(buffer, 0, bytes)
+                    Log.d("MatchCheck", "Received: $receivedMessage")
+                    Log.d("MatchCheck", "MatchCode: $matchCode")
                     Log.d("manageConnectedSocket", "After String buffer")
                     if (receivedMessage == matchCode) {
                         Thread.sleep(100)
@@ -299,6 +301,7 @@ class QuickshareActivity : AppCompatActivity() {
             val inputStream: InputStream = socket.inputStream
             val outputStream: OutputStream = socket.outputStream
 
+            Log.d("MatchCheck", "MatchCodeToSend: $matchCode")
             write(matchCode ?: "")
 
             val buffer = ByteArray(1024)
