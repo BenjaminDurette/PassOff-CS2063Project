@@ -3,10 +3,12 @@ package com.example.passoff
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -17,6 +19,7 @@ class MainActivity : AppCompatActivity() {
     private var dbHandler: DBHandler? = null
     private val ADD_PASSWORD_REQUEST_CODE = 1
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -51,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         loadData()
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == ADD_PASSWORD_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
@@ -70,6 +74,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     private fun loadData() {
         val loadDataTask = LoadDataTask(this)
         loadDataTask.setRecyclerView(recyclerView)
