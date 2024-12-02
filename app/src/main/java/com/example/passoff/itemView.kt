@@ -11,8 +11,11 @@ import android.content.Intent
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.method.HideReturnsTransformationMethod
+import android.text.method.PasswordTransformationMethod
 import android.util.Base64
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -49,10 +52,42 @@ class itemView : AppCompatActivity() {
         val passwordText = findViewById<TextView>(R.id.item_password)
         passwordText.text = password
 
+        val showPasswordButton = findViewById<ImageButton>(R.id.show_password)
+        var isPasswordVisible = false
+        showPasswordButton.setOnClickListener {
+            if (isPasswordVisible) {
+                passwordText.transformationMethod = PasswordTransformationMethod.getInstance()
+            }
+            else {
+                passwordText.transformationMethod = HideReturnsTransformationMethod.getInstance()
+            }
+            isPasswordVisible = !isPasswordVisible
+        }
+
         val domainText = findViewById<TextView>(R.id.item_domain)
         domainText.text = domain
 
         this.title = itemName
+
+        val copyName = findViewById<ImageButton>(R.id.copy_name)
+        copyName.setOnClickListener {
+            copyNameToClipboard(titleText.text.toString())
+        }
+
+        val copyUsername = findViewById<ImageButton>(R.id.copy_username)
+        copyUsername.setOnClickListener {
+            copyPasswordToClipboard(usernameText.text.toString())
+        }
+
+        val copyPassword = findViewById<ImageButton>(R.id.copy_password)
+        copyPassword.setOnClickListener {
+            copyPasswordToClipboard(passwordText.text.toString())
+        }
+
+        val copyDomain = findViewById<ImageButton>(R.id.copy_url)
+        copyDomain.setOnClickListener {
+            copyPasswordToClipboard(domainText.text.toString())
+        }
 
         val deleteButton = findViewById<Button>(R.id.delete_button)
         deleteButton.setOnClickListener {
@@ -80,11 +115,6 @@ class itemView : AppCompatActivity() {
                 }
                 .create()
             dialog.show()
-        }
-
-        val copyButton = findViewById<Button>(R.id.copy_button)
-        copyButton.setOnClickListener {
-            copyPasswordToClipboard(password)
         }
 
         val quickshareButton = findViewById<Button>(R.id.quickshare_button)
@@ -158,9 +188,47 @@ class itemView : AppCompatActivity() {
             val clip = ClipData.newPlainText("Password", password)
             // Set the clip
             clipboard.setPrimaryClip(clip)
-
             // Show a toast message to inform the user
             Toast.makeText(this, "Password copied to clipboard", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun copyNameToClipboard(name: String?) {
+        if (name != null) {
+            // Get the ClipboardManager
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            // Create a ClipData object
+            val clip = ClipData.newPlainText("Name", name)
+            // Set the clip
+            clipboard.setPrimaryClip(clip)
+            // Show a toast message to inform the user
+            Toast.makeText(this, "Item name copied to clipboard", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun copyUsernameToClipboard(username: String?) {
+        if (username != null) {
+            // Get the ClipboardManager
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            // Create a ClipData object
+            val clip = ClipData.newPlainText("Username", username)
+            // Set the clip
+            clipboard.setPrimaryClip(clip)
+            // Show a toast message to inform the user
+            Toast.makeText(this, "Username copied to clipboard", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun copyDomainToClipboard(domain: String?) {
+        if (domain != null) {
+            // Get the ClipboardManager
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            // Create a ClipData object
+            val clip = ClipData.newPlainText("Domain", domain)
+            // Set the clip
+            clipboard.setPrimaryClip(clip)
+            // Show a toast message to inform the user
+            Toast.makeText(this, "Domain copied to clipboard", Toast.LENGTH_SHORT).show()
         }
     }
 
