@@ -69,11 +69,9 @@ class UserDBHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME,
         return result
     }
 
-    // Delete a record
-    fun deleteLogin(id: Int): Int {
+    fun deleteAllLogins() {
         val db = this.writableDatabase
-        val result = db.delete(TABLE_LOGIN, "$KEY_ID=?", arrayOf(id.toString()))
+        db.delete(TABLE_LOGIN, null, null)
         db.close()
-        return result
     }
 }

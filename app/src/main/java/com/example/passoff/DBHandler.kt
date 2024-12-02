@@ -44,6 +44,13 @@ class DBHandler (context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, D
         return true
     }
 
+    fun deleteAllPasswords(): Boolean {
+        val db = this.writableDatabase
+        db.delete(TABLE_NAME, null, null)
+        db.close()
+        return true
+    }
+
     fun updatePassword(id: Int, entryName: String?, username: String?, password: String?, url: String?): Boolean {
         val db = this.writableDatabase
         val values = ContentValues()
