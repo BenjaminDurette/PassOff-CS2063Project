@@ -11,6 +11,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -168,6 +169,7 @@ class QuickshareActivity : AppCompatActivity() {
     inner class BluetoothConnectionThread(private val device: BluetoothDevice) : Thread() {
         private var socket: BluetoothSocket? = null
         private val maxRetries = 3
+        private var connectionStartTime: Long = 0
 
         init {
             socket = device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"))
@@ -179,6 +181,7 @@ class QuickshareActivity : AppCompatActivity() {
                 try {
                     Log.d("run", "Before socket?.connect()")
                     socket?.connect()
+                    connectionStartTime = SystemClock.currentThreadTimeMillis()
                     runOnUiThread {
                         Toast.makeText(this@QuickshareActivity, "Connected to device: ${device.name}", Toast.LENGTH_SHORT).show()
                     }
@@ -188,6 +191,7 @@ class QuickshareActivity : AppCompatActivity() {
                     Log.d("manageConnectedSocket", e.message ?: "No message")
                     attempt++
                     if (attempt >= maxRetries) {
+                        logConnectionNonServerDuration(SystemClock.currentThreadTimeMillis() - connectionStartTime)
                         runOnUiThread {
                             Toast.makeText(this@QuickshareActivity, "Failed to connect to device: ${device.name}", Toast.LENGTH_SHORT).show()
                         }
@@ -224,6 +228,7 @@ class QuickshareActivity : AppCompatActivity() {
                         sendAcknowledgment(false)
                     }
                 } catch (e: Exception) {
+                    logConnectionNonServerDuration(SystemClock.currentThreadTimeMillis() - connectionStartTime)
                     Log.d("manageConnectedSocket", e.message ?: "No message")
                     break
                 }
@@ -251,6 +256,7 @@ class QuickshareActivity : AppCompatActivity() {
         fun cancel() {
             try {
                 socket?.close()
+                logConnectionNonServerDuration(SystemClock.currentThreadTimeMillis() - connectionStartTime)
                 runOnUiThread {
                     Toast.makeText(this@QuickshareActivity, "Connection closed.", Toast.LENGTH_SHORT).show()
                 }
@@ -264,17 +270,20 @@ class QuickshareActivity : AppCompatActivity() {
     inner class BluetoothServerThread : Thread() {
         private val uuid: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
         private val serverSocket = bluetoothAdapter?.listenUsingRfcommWithServiceRecord("BluetoothPassOff", uuid)
+        private var connectionStartTime: Long = 0
 
         override fun run() {
             try {
                 val socket: BluetoothSocket? = serverSocket?.accept()
                 socket?.let {
+                    connectionStartTime = SystemClock.elapsedRealtime()
                     manageConnectedSocket(it)
                     runOnUiThread {
                         Toast.makeText(this@QuickshareActivity, "Bluetooth server accepted connection.", Toast.LENGTH_SHORT).show()
                     }
                 }
             } catch (e: Exception) {
+                logConnectionServerDuration(SystemClock.currentThreadTimeMillis() - connectionStartTime)
                 Log.e("BluetoothServerThread", "Error accepting connection: ${e.message}")
             }
         }
@@ -305,6 +314,7 @@ class QuickshareActivity : AppCompatActivity() {
                         sendAcknowledgment(false)
                     }
                 } catch (e: Exception) {
+                    logConnectionServerDuration(SystemClock.currentThreadTimeMillis() - connectionStartTime)
                     Log.d("manageConnectedSocket", e.message ?: "No message")
                     break
                 }
@@ -322,6 +332,7 @@ class QuickshareActivity : AppCompatActivity() {
         fun cancel() {
             try {
                 serverSocket?.close()
+                logConnectionServerDuration(SystemClock.currentThreadTimeMillis() - connectionStartTime)
                 runOnUiThread {
                     Toast.makeText(this@QuickshareActivity, "Server connection closed.", Toast.LENGTH_SHORT).show()
                 }
@@ -330,6 +341,14 @@ class QuickshareActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
         }
+    }
+
+    fun logConnectionServerDuration(time: Long){
+        Log.d("Connection Duration", "Connection duration: $time ms")
+    }
+
+    fun logConnectionNonServerDuration(time: Long){
+        Log.d("Connection Duration", "Connection duration: $time ms")
     }
 
     companion object {
