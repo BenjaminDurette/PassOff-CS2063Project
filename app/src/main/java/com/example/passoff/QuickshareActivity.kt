@@ -173,6 +173,7 @@ class QuickshareActivity : AppCompatActivity() {
                     manageConnectedSocket(socket!!)
                     return
                 } catch (e: Exception) {
+                    Log.d("manageConnectedSocket", e.message ?: "No message")
                     attempt++
                     if (attempt >= maxRetries) {
                         runOnUiThread {
@@ -207,7 +208,7 @@ class QuickshareActivity : AppCompatActivity() {
                         sendAcknowledgment(false)
                     }
                 } catch (e: Exception) {
-                    Log.e("manageConnectedSocket", "Failure in MCS")
+                    Log.d("manageConnectedSocket", e.message ?: "No message")
                     break
                 }
             }
@@ -227,6 +228,7 @@ class QuickshareActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                Log.d("manageConnectedSocket", e.message ?: "No message")
             }
         }
 
@@ -237,6 +239,7 @@ class QuickshareActivity : AppCompatActivity() {
                     Toast.makeText(this@QuickshareActivity, "Connection closed.", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
+                Log.d("manageConnectedSocket", e.message ?: "No message")
                 e.printStackTrace()
             }
         }
@@ -284,6 +287,7 @@ class QuickshareActivity : AppCompatActivity() {
                         sendAcknowledgment(false)
                     }
                 } catch (e: Exception) {
+                    Log.d("manageConnectedSocket", e.message ?: "No message")
                     break
                 }
             }
@@ -304,6 +308,7 @@ class QuickshareActivity : AppCompatActivity() {
                     Toast.makeText(this@QuickshareActivity, "Server connection closed.", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
+                Log.d("manageConnectedSocket", e.message ?: "No message")
                 e.printStackTrace()
             }
         }
