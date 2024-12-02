@@ -210,12 +210,10 @@ class QuickshareActivity : AppCompatActivity() {
             val buffer = ByteArray(1024)
             var bytes: Int
 
-            while (true) {
                 try {
                     Thread.sleep(100)
                     Log.d("manageConnectedSocket", "Sender Before inputStream.read")
                     bytes = inputStream.read(buffer)
-                    if (bytes == -1) break
                     Log.d("manageConnectedSocket", "Sender After inputStream.read")
                     val receivedMessage = String(buffer, 0, bytes)
                     Log.d("manageConnectedSocket", "After String buffer")
@@ -231,9 +229,7 @@ class QuickshareActivity : AppCompatActivity() {
                 } catch (e: Exception) {
                     logConnectionDuration("From NonServer MCS, Exception: ${e.message}", SystemClock.currentThreadTimeMillis() - connectionStartTime)
                     Log.d("manageConnectedSocket", e.message ?: "No message")
-                    break
                 }
-            }
         }
 
         private fun sendAcknowledgment(isSuccess: Boolean) {
@@ -244,6 +240,7 @@ class QuickshareActivity : AppCompatActivity() {
 
         fun write(message: String) {
             try {
+                Log.d("manageConnectedSocket", "writing message: ${message}")
                 socket?.outputStream?.write(message.toByteArray())
                 runOnUiThread {
                     Toast.makeText(this@QuickshareActivity, "Message sent: $message", Toast.LENGTH_SHORT).show()
@@ -272,10 +269,11 @@ class QuickshareActivity : AppCompatActivity() {
         private val uuid: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
         private val serverSocket = bluetoothAdapter?.listenUsingRfcommWithServiceRecord("BluetoothPassOff", uuid)
         private var connectionStartTime: Long = 0
+        private var socket: BluetoothSocket? = null
 
         override fun run() {
             try {
-                val socket: BluetoothSocket? = serverSocket?.accept()
+                socket = serverSocket?.accept()
                 socket?.let {
                     connectionStartTime = SystemClock.elapsedRealtime()
                     Log.d("manageConnectedSocket", "Receiver Socket open before MCS call: ${socket?.isConnected}")
@@ -299,44 +297,53 @@ class QuickshareActivity : AppCompatActivity() {
             val inputStream: InputStream = socket.inputStream
             val outputStream: OutputStream = socket.outputStream
 
+            write(matchCode ?: "")
+
             val buffer = ByteArray(1024)
             var bytes: Int
-            while (true) {
+
                 try {
                     Log.d("manageConnectedSocket", "Receiver Socket open at begigning of loop: ${socket?.isConnected}")
 
                     bytes = inputStream.read(buffer)
                     Log.d("manageConnectedSocket", "Receiver Socket open at after input read: ${socket?.isConnected}")
                     Log.d("manageConnectedSocket", "bytes: $bytes")
-                    if (bytes == -1) break
+
                     val receivedMessage = String(buffer, 0, bytes)
                     Log.d("manageConnectedSocket", "Received message: $receivedMessage")
-                    if (receivedMessage == matchCode) {
-                        sendAcknowledgment(true)
-                        bytes = inputStream.read(buffer)
-                        if (bytes == -1) break
-                        val receivedEncryptedMessage = String(buffer, 0, bytes)
-                        val decryptedMessage = decryptMessage(receivedEncryptedMessage, matchCode ?: "")
+                    if (receivedMessage == "MATCH_FAILED") {
                         runOnUiThread {
-                            binding.sharedPasswordText.text = "Received message: $decryptedMessage"
-                            binding.sharedPasswordText.visibility = android.view.View.VISIBLE
+                            Toast.makeText(
+                                this@QuickshareActivity,
+                                "Match code verification failed.",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
-                        Toast.makeText(this@QuickshareActivity, "Message received and decrypted.", Toast.LENGTH_SHORT).show()
-                    } else {
-                        sendAcknowledgment(false)
                     }
+
+                    val decryptedMessage = decryptMessage(receivedMessage, matchCode ?: "")
+                    runOnUiThread {
+                        binding.sharedPasswordText.text = "Received message: $decryptedMessage"
+                        binding.sharedPasswordText.visibility = android.view.View.VISIBLE
+                    }
+                     sendAcknowledgment(true)
                 } catch (e: Exception) {
-                    Log.d("manageConnectedSocket", "Receiver Socket open at excpetion: ${socket?.isConnected}")
-                    logConnectionDuration("From Server MCS, Excpetion: ${e.message}", SystemClock.currentThreadTimeMillis() - connectionStartTime)
+                    Log.d(
+                        "manageConnectedSocket",
+                        "Receiver Socket open at excpetion: ${socket?.isConnected}"
+                    )
+                    logConnectionDuration(
+                        "From Server MCS, Excpetion: ${e.message}",
+                        SystemClock.currentThreadTimeMillis() - connectionStartTime
+                    )
                     Log.d("manageConnectedSocket", e.message ?: "No message")
-                    break
+
                 }
-            }
         }
 
         private fun sendAcknowledgment(isSuccess: Boolean) {
             val acknowledgment = if (isSuccess) "MATCH_SUCCESS" else "MATCH_FAILED"
-            connectionThread?.write(acknowledgment)
+            write(acknowledgment)
             runOnUiThread {
                 Toast.makeText(this@QuickshareActivity, "Acknowledgment sent: $acknowledgment", Toast.LENGTH_SHORT).show()
             }
@@ -351,6 +358,17 @@ class QuickshareActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 Log.d("manageConnectedSocket", e.message ?: "No message")
+                e.printStackTrace()
+            }
+        }
+
+        fun write(message: String) {
+            try {
+                Log.d("manageConnectedSocket", "writing message: ${message}")
+                 socket?.outputStream?.write(message.toByteArray())
+            } catch (e: Exception) {
+                Log.d("manageConnectedSocket", e.message ?: "No message")
+
                 e.printStackTrace()
             }
         }
