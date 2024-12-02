@@ -148,6 +148,10 @@ class QuickshareActivity : AppCompatActivity() {
 
     private fun decryptMessage(encryptedMessage: String, matchCode: String): String {
         val key = EncryptionUtils.deriveKeyFromMatchCode(matchCode)
+        Log.d(
+            "java",
+            "After key"
+        )
         return EncryptionUtils.decrypt(encryptedMessage, key)
     }
 
@@ -225,7 +229,13 @@ class QuickshareActivity : AppCompatActivity() {
                         Thread.sleep(100)
                         sendEncryptedMessage(passwordToSend ?: "")
                         Log.d("manageConnectedSocket", "Sender After send encrypted")
-                        Toast.makeText(this@QuickshareActivity, "Match code received, sending encrypted message.", Toast.LENGTH_SHORT).show()
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@QuickshareActivity,
+                                "Match code received, sending encrypted message.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     } else {
                         Log.d("manageConnectedSocket", "Sender Match codes did not match")
                         sendAcknowledgment(false)
@@ -325,12 +335,19 @@ class QuickshareActivity : AppCompatActivity() {
                             ).show()
                         }
                     }
-
+                    Log.d(
+                        "java",
+                        "Before Decrypt"
+                    )
                     val decryptedMessage = decryptMessage(receivedMessage, matchCode ?: "")
                     runOnUiThread {
                         binding.sharedPasswordText.text = "Received message: $decryptedMessage"
                         binding.sharedPasswordText.visibility = android.view.View.VISIBLE
                     }
+                    Log.d(
+                        "java",
+                        "After Decrypt"
+                    )
                      sendAcknowledgment(true)
                 } catch (e: Exception) {
                     Log.d(
