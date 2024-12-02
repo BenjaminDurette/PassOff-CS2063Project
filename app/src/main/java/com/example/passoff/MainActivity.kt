@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity() {
         progressIndicator = findViewById(R.id.circularProgressIndicator)
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onResume() {
         super.onResume()
         loadData()
