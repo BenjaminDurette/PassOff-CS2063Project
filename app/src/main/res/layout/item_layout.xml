@@ -26,5 +26,5 @@
         android:focusable="false"
         android:padding="8dp"
         android:text="DELETE"
-        android:layout_gravity="right"/>
+        android:layout_gravity="end"/>
 </androidx.cardview.widget.CardView>

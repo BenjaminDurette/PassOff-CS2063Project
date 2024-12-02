@@ -85,12 +85,12 @@ class itemView : AppCompatActivity() {
                 copyPasswordToClipboard(password)
             }
 
-            val encryptLabel = findViewById<TextView>(R.id.encrypted_text)
-            val encryptButton = findViewById<Button>(R.id.encrypt_button)
-            val decryptButton = findViewById<Button>(R.id.decrypt_button)
+            //val encryptLabel = findViewById<TextView>(R.id.encrypted_text)
+            //val encryptButton = findViewById<Button>(R.id.encrypt_button)
+            //val decryptButton = findViewById<Button>(R.id.decrypt_button)
             val quickshareButton = findViewById<Button>(R.id.quickshare_button)
 
-            encryptButton.setOnClickListener {
+            /*encryptButton.setOnClickListener {
                 if (password != null) {
                     val encryptedText = encryptPassword(password)
                     encryptLabel.text = "Encryption Text: $encryptedText"
@@ -102,7 +102,7 @@ class itemView : AppCompatActivity() {
                 val encryptedText = encryptLabel.text.toString().removePrefix("Encryption Text: ")
                 val decryptedText = decrypt(encryptedText)
                 encryptLabel.text = "Decryption Text: $decryptedText"
-            }
+            }*/
 
             // Decrypt button click listener
             quickshareButton.setOnClickListener {
