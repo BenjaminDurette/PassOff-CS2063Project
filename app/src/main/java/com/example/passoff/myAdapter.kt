@@ -1,7 +1,9 @@
 package com.example.passoff
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -47,14 +49,28 @@ class MyAdapter(private val parentActivity: Activity, private val mDataset: Arra
         }
 
         holder.deleteButton.setOnClickListener {
-            val dbHandler = DBHandler(parentActivity)
-            val success = dbHandler.deletePassword(item.id)
-            if (success) {
-                Toast.makeText(parentActivity, "Password deleted successfully", Toast.LENGTH_SHORT).show()
-                mDataset.removeAt(position)
-                notifyItemRemoved(position)
-                notifyItemRangeChanged(position, mDataset.size)
-            }
+            val dialogView = LayoutInflater.from(parentActivity).inflate(R.layout.dialog_confirm, null)
+            val dialog = AlertDialog.Builder(parentActivity)
+                .setTitle("Delete Password")
+                .setView(dialogView)
+                .setPositiveButton("Delete") { dialog, _ ->
+                    val dbHandler = DBHandler(parentActivity)
+                    val success = dbHandler.deletePassword(item.id)
+                    if (success) {
+                        Log.d("Database", "Password deleted successfully")
+                        mDataset.removeAt(position)
+                        notifyItemRemoved(position)
+                        notifyItemRangeChanged(position, mDataset.size)
+                    } else {
+                        Log.e("Database", "Failed to delete password")
+                    }
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.cancel()
+                }
+                .create()
+            dialog.show()
         }
 
     }

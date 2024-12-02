@@ -80,41 +80,23 @@ class itemView : AppCompatActivity() {
                 }
                 .create()
             dialog.show()
-            val copyButton = findViewById<Button>(R.id.copy_button)
-            copyButton.setOnClickListener {
-                copyPasswordToClipboard(password)
-            }
+        }
 
-            //val encryptLabel = findViewById<TextView>(R.id.encrypted_text)
-            //val encryptButton = findViewById<Button>(R.id.encrypt_button)
-            //val decryptButton = findViewById<Button>(R.id.decrypt_button)
-            val quickshareButton = findViewById<Button>(R.id.quickshare_button)
+        val copyButton = findViewById<Button>(R.id.copy_button)
+        copyButton.setOnClickListener {
+            copyPasswordToClipboard(password)
+        }
 
-            /*encryptButton.setOnClickListener {
-                if (password != null) {
-                    val encryptedText = encryptPassword(password)
-                    encryptLabel.text = "Encryption Text: $encryptedText"
-                }
-            }
-
-            // Decrypt button click listener
-            decryptButton.setOnClickListener {
-                val encryptedText = encryptLabel.text.toString().removePrefix("Encryption Text: ")
-                val decryptedText = decrypt(encryptedText)
-                encryptLabel.text = "Decryption Text: $decryptedText"
-            }*/
-
-            // Decrypt button click listener
-            quickshareButton.setOnClickListener {
-                if (BluetoothUtils.areBluetoothPermissionsGranted(this)) {
-                    // If Bluetooth permissions are available, start the QuickshareActivity
-                    val intent = Intent(this, QuickshareActivity::class.java)
-                    intent.putExtra("isSenderMode", false)
-                    startActivity(intent)
-                } else {
-                    // If Bluetooth permissions are not available, show a Toast message
-                    Toast.makeText(this, "Bluetooth permissions are required", Toast.LENGTH_LONG).show()
-                }
+        val quickshareButton = findViewById<Button>(R.id.quickshare_button)
+        quickshareButton.setOnClickListener {
+            if (BluetoothUtils.areBluetoothPermissionsGranted(this)) {
+                // If Bluetooth permissions are available, start the QuickshareActivity
+                val intent = Intent(this, QuickshareActivity::class.java)
+                intent.putExtra("isSenderMode", false)
+                startActivity(intent)
+            } else {
+                // If Bluetooth permissions are not available, show a Toast message
+                Toast.makeText(this, "Bluetooth permissions are required", Toast.LENGTH_LONG).show()
             }
         }
     }
