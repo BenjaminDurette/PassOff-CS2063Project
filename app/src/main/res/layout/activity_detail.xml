@@ -57,6 +57,7 @@
         android:layout_height="wrap_content"
         android:backgroundTint="#B80404"
         android:text="Delete Password" />
+
     <Button
         android:id="@+id/quickshare_button"
         android:layout_width="wrap_content"
