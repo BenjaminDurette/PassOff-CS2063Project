@@ -141,11 +141,13 @@ class QuickshareActivity : AppCompatActivity() {
         Toast.makeText(this, "Encrypted message sent.", Toast.LENGTH_SHORT).show()
     }
 
-    private fun encryptMessage(message: String, key: String): String {
+    private fun encryptMessage(message: String, matchCode: String): String {
+        val key = EncryptionUtils.deriveKeyFromMatchCode(matchCode)
         return EncryptionUtils.encrypt(message, key)
     }
 
-    private fun decryptMessage(encryptedMessage: String, key: String): String {
+    private fun decryptMessage(encryptedMessage: String, matchCode: String): String {
+        val key = EncryptionUtils.deriveKeyFromMatchCode(matchCode)
         return EncryptionUtils.decrypt(encryptedMessage, key)
     }
 

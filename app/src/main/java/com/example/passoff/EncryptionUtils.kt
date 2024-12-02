@@ -16,22 +16,23 @@ class EncryptionUtils {
         private const val ITERATIONS = 10000
 
         // Generic function to encrypt a message using a key
-        fun encrypt(message: String, key: String): String {
-            val secretKey = SecretKeySpec(key.toByteArray(), ALGORITHM)
-            val cipher = Cipher.getInstance(ALGORITHM)
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-            val encryptedBytes = cipher.doFinal(message.toByteArray())
+        fun encrypt(message: String, key: ByteArray): String {
+            // Example encryption logic using AES
+            val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+            val secretKeySpec = SecretKeySpec(key, "AES")
+            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec)
+            val encryptedBytes = cipher.doFinal(message.toByteArray(Charsets.UTF_8))
             return Base64.encodeToString(encryptedBytes, Base64.DEFAULT)
         }
 
-        // Generic function to decrypt a message using a key
-        fun decrypt(encryptedMessage: String, key: String): String {
-            val secretKey = SecretKeySpec(key.toByteArray(), ALGORITHM)
-            val cipher = Cipher.getInstance(ALGORITHM)
-            cipher.init(Cipher.DECRYPT_MODE, secretKey)
+        fun decrypt(encryptedMessage: String, key: ByteArray): String {
+            // Example decryption logic using AES
+            val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+            val secretKeySpec = SecretKeySpec(key, "AES")
+            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec)
             val decodedBytes = Base64.decode(encryptedMessage, Base64.DEFAULT)
             val decryptedBytes = cipher.doFinal(decodedBytes)
-            return String(decryptedBytes)
+            return String(decryptedBytes, Charsets.UTF_8)
         }
 
         // Function to derive an AES key from a password using PBKDF2
@@ -53,6 +54,11 @@ class EncryptionUtils {
             val random = java.security.SecureRandom()
             random.nextBytes(salt)
             return salt
+        }
+
+        fun deriveKeyFromMatchCode(matchCode: String): ByteArray {
+            val digest = MessageDigest.getInstance("SHA-256")
+            return digest.digest(matchCode.toByteArray(Charsets.UTF_8))
         }
     }
 }
