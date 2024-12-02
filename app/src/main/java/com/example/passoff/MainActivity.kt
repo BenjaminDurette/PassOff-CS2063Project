@@ -47,7 +47,10 @@ class MainActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recyclerView)
         progressIndicator = findViewById(R.id.circularProgressIndicator)
+    }
 
+    override fun onResume() {
+        super.onResume()
         loadData()
     }
 
@@ -71,6 +74,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadData() {
+        val searchBar = findViewById<androidx.appcompat.widget.SearchView>(R.id.searchView)
+        val appTitle = findViewById<android.widget.TextView>(R.id.appTitle)
+        searchBar.visibility = android.view.View.INVISIBLE
+        appTitle.visibility = android.view.View.VISIBLE
+
         val loadDataTask = LoadDataTask(this)
         loadDataTask.setRecyclerView(recyclerView)
         loadDataTask.setCircularProgressIndicator(progressIndicator)
@@ -84,7 +92,10 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.navigation_search -> {
-                    Toast.makeText(this, "Search selected", Toast.LENGTH_SHORT).show()
+                    val searchBar = findViewById<androidx.appcompat.widget.SearchView>(R.id.searchView)
+                    val appTitle = findViewById<android.widget.TextView>(R.id.appTitle)
+                    searchBar.visibility = android.view.View.VISIBLE
+                    appTitle.visibility = android.view.View.INVISIBLE
                     true
                 }
                 R.id.navigation_quickshare -> {

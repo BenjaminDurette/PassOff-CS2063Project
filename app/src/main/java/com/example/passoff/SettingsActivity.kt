@@ -27,7 +27,7 @@ class SettingsActivity: AppCompatActivity() {
 
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
-            finish()
+            finishAffinity()
 
             Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show()
         }
