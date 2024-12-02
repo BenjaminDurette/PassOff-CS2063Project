@@ -11,6 +11,7 @@ import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.SeekBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -171,7 +172,17 @@ class AddPasswordActivity : AppCompatActivity() {
         val dialog = AlertDialog.Builder(this)
             .setTitle("Enter New Password Information")
             .setView(dialogView)
-            .setPositiveButton("Submit") { dialog, _ ->
+            .setPositiveButton("Submit", null)
+            .setNegativeButton("Cancel") { dialog, _ ->
+                setResult(Activity.RESULT_CANCELED)
+                dialog.cancel()
+                finish()
+            }
+            .create()
+
+        dialog.setOnShowListener {
+            val submitButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            submitButton?.setOnClickListener {
                 if (titleEditText.text.isNotEmpty() && usernameEditText.text.isNotEmpty() && passwordEditText.text.isNotEmpty()) {
                     if (domainEditText.text.isEmpty()) {
                         domainEditText.setText("N/A")
@@ -187,19 +198,19 @@ class AddPasswordActivity : AppCompatActivity() {
                     resultIntent.putExtra("password", passwordText)
                     resultIntent.putExtra("domain", domain)
                     setResult(Activity.RESULT_OK, resultIntent)
-                } else {
-                    setResult(Activity.RESULT_CANCELED)
-                }
 
-                dialog.dismiss()
-                finish()
+                    dialog.dismiss()
+                    finish()
+                } else {
+                    Toast.makeText(this, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
+                    titleEditText.hint = "* Title *"
+                    usernameEditText.hint = "* Username *"
+                    titleEditText.setHintTextColor(ContextCompat.getColor(this, R.color.red))
+                    usernameEditText.setHintTextColor(ContextCompat.getColor(this, R.color.red))
+                    // Dialog will remain open here
+                }
             }
-            .setNegativeButton("Cancel") { dialog, _ ->
-                setResult(Activity.RESULT_CANCELED)
-                dialog.cancel()
-                finish()
-            }
-            .create()
+        }
 
         dialog.show()
     }
