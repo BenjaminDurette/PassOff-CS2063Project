@@ -8,6 +8,7 @@
     android:orientation="horizontal"
     card_view:cardCornerRadius="8dp"
     card_view:cardElevation="4dp">
+    // May need height changed
 
     <TextView
         android:id="@+id/item_textview"
