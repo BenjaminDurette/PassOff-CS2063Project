@@ -277,7 +277,11 @@ class QuickshareActivity : AppCompatActivity() {
                 val socket: BluetoothSocket? = serverSocket?.accept()
                 socket?.let {
                     connectionStartTime = SystemClock.elapsedRealtime()
+                    Log.d("manageConnectedSocket", "Socket open before MCS call: ${socket?.isConnected}")
+
                     manageConnectedSocket(it)
+                    Log.d("manageConnectedSocket", "Socket open after MCS call: ${socket?.isConnected}")
+
                     runOnUiThread {
                         Toast.makeText(this@QuickshareActivity, "Bluetooth server accepted connection.", Toast.LENGTH_SHORT).show()
                     }
@@ -289,6 +293,8 @@ class QuickshareActivity : AppCompatActivity() {
         }
 
         private fun manageConnectedSocket(socket: BluetoothSocket) {
+            Log.d("manageConnectedSocket", "Socket open at beggingin: ${socket?.isConnected}")
+
             val inputStream: InputStream = socket.inputStream
             val outputStream: OutputStream = socket.outputStream
 
@@ -296,6 +302,8 @@ class QuickshareActivity : AppCompatActivity() {
             var bytes: Int
             while (true) {
                 try {
+                    Log.d("manageConnectedSocket", "Socket open at begigning of loop: ${socket?.isConnected}")
+
                     bytes = inputStream.read(buffer)
                     if (bytes == -1) break
                     val receivedMessage = String(buffer, 0, bytes)
@@ -314,6 +322,7 @@ class QuickshareActivity : AppCompatActivity() {
                         sendAcknowledgment(false)
                     }
                 } catch (e: Exception) {
+                    Log.d("manageConnectedSocket", "Socket open at excpetion: ${socket?.isConnected}")
                     logConnectionDuration("From Server MCS, Excpetion: ${e.message}", SystemClock.currentThreadTimeMillis() - connectionStartTime)
                     Log.d("manageConnectedSocket", e.message ?: "No message")
                     break
@@ -344,7 +353,7 @@ class QuickshareActivity : AppCompatActivity() {
     }
 
     fun logConnectionDuration(tag: String, time: Long){
-        Log.d("Connection Duration", "${tag}\nConnection duration: $time ms")
+        Log.d("Connection Duration", "${tag}: Connection duration: $time ms")
     }
 
     companion object {
