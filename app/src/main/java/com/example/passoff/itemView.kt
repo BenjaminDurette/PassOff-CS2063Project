@@ -54,6 +54,31 @@ class itemView : AppCompatActivity() {
 
         this.title = itemName
 
+        val copyButton = findViewById<Button>(R.id.copy_button)
+
+        // Decrypt button click listener
+        copyButton.setOnClickListener {
+            copyPasswordToClipboard(password)
+            Toast.makeText(this, "Quickshare selected", Toast.LENGTH_SHORT).show()
+        }
+
+        val quickshareButton = findViewById<Button>(R.id.quickshare_button)
+
+        // Decrypt button click listener
+        quickshareButton.setOnClickListener {
+            Toast.makeText(this, "Quickshare selected", Toast.LENGTH_SHORT).show()
+            // Check if Bluetooth permissions are granted and request them if not
+            if (BluetoothUtils.areBluetoothPermissionsGranted(this)) {
+                // If Bluetooth permissions are available, start the QuickshareActivity
+                val intent = Intent(this, QuickshareActivity::class.java)
+                intent.putExtra("isSenderMode", true).putExtra("passwordToSend", password)
+                startActivity(intent)
+            } else {
+                // If Bluetooth permissions are not available, show a Toast message
+                Toast.makeText(this, "Bluetooth permissions are required", Toast.LENGTH_LONG).show()
+            }
+        }
+
         val deleteButton = findViewById<Button>(R.id.delete_button)
         deleteButton.setOnClickListener {
             val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_confirm, null)
@@ -83,38 +108,6 @@ class itemView : AppCompatActivity() {
             val copyButton = findViewById<Button>(R.id.copy_button)
             copyButton.setOnClickListener {
                 copyPasswordToClipboard(password)
-            }
-
-            val encryptLabel = findViewById<TextView>(R.id.encrypted_text)
-            val encryptButton = findViewById<Button>(R.id.encrypt_button)
-            val decryptButton = findViewById<Button>(R.id.decrypt_button)
-            val quickshareButton = findViewById<Button>(R.id.quickshare_button)
-
-            encryptButton.setOnClickListener {
-                if (password != null) {
-                    val encryptedText = encryptPassword(password)
-                    encryptLabel.text = "Encryption Text: $encryptedText"
-                }
-            }
-
-            // Decrypt button click listener
-            decryptButton.setOnClickListener {
-                val encryptedText = encryptLabel.text.toString().removePrefix("Encryption Text: ")
-                val decryptedText = decrypt(encryptedText)
-                encryptLabel.text = "Decryption Text: $decryptedText"
-            }
-
-            // Decrypt button click listener
-            quickshareButton.setOnClickListener {
-                if (BluetoothUtils.areBluetoothPermissionsGranted(this)) {
-                    // If Bluetooth permissions are available, start the QuickshareActivity
-                    val intent = Intent(this, QuickshareActivity::class.java)
-                    intent.putExtra("isSenderMode", false)
-                    startActivity(intent)
-                } else {
-                    // If Bluetooth permissions are not available, show a Toast message
-                    Toast.makeText(this, "Bluetooth permissions are required", Toast.LENGTH_LONG).show()
-                }
             }
         }
     }

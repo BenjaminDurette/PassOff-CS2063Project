@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothSocket
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -17,6 +18,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.util.*
 
+@SuppressLint("MissingPermission")
 class QuickshareActivity : AppCompatActivity() {
     private lateinit var binding: ActivityQuickshareBinding
     private val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
@@ -25,33 +27,22 @@ class QuickshareActivity : AppCompatActivity() {
     private var passwordToSend: String? = null
     private var connectionThread: BluetoothConnectionThread? = null
 
-    private val REQUEST_BLUETOOTH_PERMISSIONS = 1
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityQuickshareBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Check if Bluetooth is available
         if (bluetoothAdapter == null) {
             Toast.makeText(this, "Bluetooth not supported on this device", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
 
-        // Check and request Bluetooth permissions
-        if (!hasBluetoothPermissions()) {
-            requestBluetoothPermissions()
-        }
-
-        // Setup mode and password to send
         isSenderMode = intent.getBooleanExtra("isSenderMode", false)
         passwordToSend = intent.getStringExtra("passwordToSend")
 
-        // Set button text based on mode
         binding.beginWaitingButton.text = if (isSenderMode) "Send Password" else "Receive Password"
 
-        // Set onClickListener for the button
         binding.beginWaitingButton.setOnClickListener {
             matchCode = binding.matchCodeInput.text.toString()
             if (matchCode.isNullOrEmpty()) {
@@ -59,9 +50,9 @@ class QuickshareActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Check if Bluetooth is enabled, then proceed with app logic
             if (bluetoothAdapter?.isEnabled == true) {
-                // Bluetooth is enabled, start the Bluetooth connection logic based on sender/receiver mode
+                Log.d("QuickshareActivity", "Bluetooth is enabled, proceeding with setup.")
+                Toast.makeText(this, "Bluetooth enabled, starting process.", Toast.LENGTH_SHORT).show()
                 if (isSenderMode) {
                     connectionThread = BluetoothConnectionThread()
                     connectionThread?.start()
@@ -69,8 +60,8 @@ class QuickshareActivity : AppCompatActivity() {
                     startBluetoothServer()
                 }
             } else {
-                // Bluetooth is disabled, show a toast message
-                Toast.makeText(this, "Bluetooth is disabled. Please enable Bluetooth to use this feature.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Bluetooth is disabled. Please enable it.", Toast.LENGTH_SHORT).show()
+                Log.d("QuickshareActivity", "Bluetooth is disabled. Aborting.")
             }
         }
     }
@@ -78,12 +69,11 @@ class QuickshareActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (bluetoothAdapter?.isEnabled == true) {
+            Log.d("QuickshareActivity", "Bluetooth is enabled on resume.")
             if (isSenderMode) {
-                // Start Bluetooth Client (Sender)
                 connectionThread = BluetoothConnectionThread()
                 connectionThread?.start()
             } else {
-                // Start Bluetooth Server (Receiver)
                 startBluetoothServer()
             }
         }
@@ -91,126 +81,92 @@ class QuickshareActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        Log.d("QuickshareActivity", "Pausing activity, stopping Bluetooth processes.")
         stopBluetoothServer()
         connectionThread?.cancel()
     }
 
-    // Check if Bluetooth permissions are granted
-    private fun hasBluetoothPermissions(): Boolean {
-        val permissions = arrayOf(
-            Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.BLUETOOTH_CONNECT,
-            Manifest.permission.BLUETOOTH_SCAN
-        )
-        return permissions.all { permission ->
-            ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
-        }
-    }
-
-    // Request Bluetooth permissions
-    private fun requestBluetoothPermissions() {
-        val permissions = arrayOf(
-            Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.BLUETOOTH_CONNECT,
-            Manifest.permission.BLUETOOTH_SCAN
-        )
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_BLUETOOTH_PERMISSIONS)
-    }
-
-    // Handle Bluetooth permissions result
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_BLUETOOTH_PERMISSIONS) {
-            if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                Toast.makeText(this, "Bluetooth permissions granted", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Bluetooth permissions are required for this app", Toast.LENGTH_SHORT).show()
-                finish()
-            }
-        }
-    }
-
-    // Start the Bluetooth server (Receiver)
     private fun startBluetoothServer() {
         val serverThread = BluetoothServerThread()
         serverThread.start()
+        Log.d("QuickshareActivity", "Bluetooth server thread started.")
+        Toast.makeText(this, "Starting Bluetooth server...", Toast.LENGTH_SHORT).show()
     }
 
-    // Stop the Bluetooth server
-    @SuppressLint("MissingPermission")
+
     private fun stopBluetoothServer() {
+        Log.d("QuickshareActivity", "Stopping Bluetooth discovery.")
         bluetoothAdapter?.cancelDiscovery()
     }
 
-    // Encrypt the message before sending
     private fun sendEncryptedMessage(message: String) {
         val encryptedMessage = encryptMessage(message, matchCode ?: "test")
         connectionThread?.write(encryptedMessage)
+        Log.d("QuickshareActivity", "Sending encrypted message.")
     }
 
-    // Encrypt the message using a key
     private fun encryptMessage(message: String, key: String): String {
+        Log.d("QuickshareActivity", "Encrypting message: $message")
         return EncryptionUtils.encrypt(message, key)
     }
 
-    // Decrypt the message using a key
     private fun decryptMessage(encryptedMessage: String, key: String): String {
+        Log.d("QuickshareActivity", "Decrypting message.")
         return EncryptionUtils.decrypt(encryptedMessage, key)
     }
 
-    // Thread for Bluetooth Server (Receiver)
     inner class BluetoothServerThread : Thread() {
         private val uuid: UUID = UUID.randomUUID()
-        @SuppressLint("MissingPermission")
         private val serverSocket = bluetoothAdapter?.listenUsingRfcommWithServiceRecord("BluetoothPassOff", uuid)
 
         override fun run() {
-            val socket: BluetoothSocket? = serverSocket?.accept()
-            socket?.let {
-                manageConnectedSocket(it)
+            try {
+                Log.d("BluetoothServerThread", "Waiting for a connection...")
+                val socket: BluetoothSocket? = serverSocket?.accept()
+                socket?.let {
+                    Log.d("BluetoothServerThread", "Connection accepted.")
+                    manageConnectedSocket(it)
+                }
+            } catch (e: Exception) {
+                Log.e("BluetoothServerThread", "Error accepting connection: ${e.message}")
             }
         }
 
         private fun manageConnectedSocket(socket: BluetoothSocket) {
             val inputStream: InputStream = socket.inputStream
             val outputStream: OutputStream = socket.outputStream
-
             val buffer = ByteArray(1024)
             var bytes: Int
-            while (true) {
-                try {
+
+            try {
+                bytes = inputStream.read(buffer)
+                val receivedMessage = String(buffer, 0, bytes)
+                Log.d("BluetoothServerThread", "Received message: $receivedMessage")
+                if (receivedMessage == matchCode) {
+                    sendAcknowledgment(true)
+                    // Receive encrypted message
                     bytes = inputStream.read(buffer)
-                    val receivedMessage = String(buffer, 0, bytes)
-                    if (receivedMessage == matchCode) {
-                        // Acknowledge successful match
-                        sendAcknowledgment(true)
-                        // Receive encrypted message
-                        bytes = inputStream.read(buffer)
-                        val receivedEncryptedMessage = String(buffer, 0, bytes)
-                        val decryptedMessage = decryptMessage(receivedEncryptedMessage, matchCode ?: "")
-                        runOnUiThread {
-                            binding.sharedPasswordText.text = "Received message: $decryptedMessage"
-                        }
-                    } else {
-                        sendAcknowledgment(false)
+                    val receivedEncryptedMessage = String(buffer, 0, bytes)
+                    val decryptedMessage = decryptMessage(receivedEncryptedMessage, matchCode ?: "")
+                    runOnUiThread {
+                        binding.sharedPasswordText.text = "Received message: $decryptedMessage"
+                        binding.sharedPasswordText.visibility = android.view.View.VISIBLE
                     }
-                } catch (e: Exception) {
-                    break
+                } else {
+                    sendAcknowledgment(false)
                 }
+            } catch (e: Exception) {
+                Log.e("BluetoothServerThread", "Error during communication: ${e.message}")
             }
         }
 
-        // Acknowledge success or failure
         private fun sendAcknowledgment(isSuccess: Boolean) {
             val acknowledgment = if (isSuccess) "MATCH_SUCCESS" else "MATCH_FAILED"
             connectionThread?.write(acknowledgment)
+            Log.d("BluetoothServerThread", "Acknowledgment sent: $acknowledgment")
         }
     }
 
-    @SuppressLint("MissingPermission")
-    // Thread for Bluetooth Client (Sender)
     inner class BluetoothConnectionThread : Thread() {
         private var socket: BluetoothSocket? = null
         private val device: BluetoothDevice? = bluetoothAdapter?.bondedDevices?.firstOrNull()
@@ -218,59 +174,45 @@ class QuickshareActivity : AppCompatActivity() {
         init {
             device?.let {
                 socket = it.createRfcommSocketToServiceRecord(UUID.randomUUID())
+                Log.d("BluetoothConnectionThread", "Socket created for device: ${it.name}")
             }
         }
 
-        @SuppressLint("MissingPermission")
         override fun run() {
-            socket?.connect()
-            socket?.let {
-                manageConnectedSocket(it)
+            try {
+                Log.d("BluetoothConnectionThread", "Connecting to device: ${device?.name}")
+                socket?.connect()
+                Log.d("BluetoothConnectionThread", "Connection successful.")
+                socket?.let {
+                    manageConnectedSocket(it)
+                }
+            } catch (e: Exception) {
+                Log.e("BluetoothConnectionThread", "Connection failed: ${e.message}")
             }
         }
 
         private fun manageConnectedSocket(socket: BluetoothSocket) {
-            val inputStream = socket.inputStream
-            val outputStream = socket.outputStream
-
-            val buffer = ByteArray(1024)
-            var bytes: Int
-            while (true) {
-                try {
-                    bytes = inputStream.read(buffer)
-                    val receivedMessage = String(buffer, 0, bytes)
-                    if (receivedMessage == matchCode) {
-                        sendEncryptedMessage(passwordToSend ?: "")
-                    } else {
-                        sendAcknowledgment(false)
-                    }
-                } catch (e: Exception) {
-                    break
-                }
-            }
+            Log.d("BluetoothConnectionThread", "Managing connected socket.")
         }
 
-        private fun sendAcknowledgment(isSuccess: Boolean) {
-            val acknowledgment = if (isSuccess) "MATCH_SUCCESS" else "MATCH_FAILED"
-            connectionThread?.write(acknowledgment)
-        }
-
-        // Write a message to the connected Bluetooth socket
         fun write(message: String) {
             try {
                 socket?.outputStream?.write(message.toByteArray())
+                Log.d("BluetoothConnectionThread", "Message written: $message")
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("BluetoothConnectionThread", "Error writing message: ${e.message}")
             }
         }
 
-        // Cancel the Bluetooth connection
         fun cancel() {
             try {
                 socket?.close()
+                Log.d("BluetoothConnectionThread", "Socket closed.")
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("BluetoothConnectionThread", "Error closing socket: ${e.message}")
             }
         }
     }
 }
+
+
