@@ -203,7 +203,7 @@ class QuickshareActivity : AppCompatActivity() {
         }
 
         private fun manageConnectedSocket(socket: BluetoothSocket) {
-            Log.d("manageConnectedSocket", "Beggining")
+            Log.d("manageConnectedSocket", "Sender Beggining")
             val inputStream = socket.inputStream
             val outputStream = socket.outputStream
 
@@ -213,18 +213,19 @@ class QuickshareActivity : AppCompatActivity() {
             while (true) {
                 try {
                     Thread.sleep(100)
+                    Log.d("manageConnectedSocket", "Sender Before inputStream.read")
                     bytes = inputStream.read(buffer)
                     if (bytes == -1) break
-                    Log.d("manageConnectedSocket", "After inputStream.read")
+                    Log.d("manageConnectedSocket", "Sender After inputStream.read")
                     val receivedMessage = String(buffer, 0, bytes)
                     Log.d("manageConnectedSocket", "After String buffer")
                     if (receivedMessage == matchCode) {
                         Thread.sleep(100)
                         sendEncryptedMessage(passwordToSend ?: "")
-                        Log.d("manageConnectedSocket", "After send encrypted")
+                        Log.d("manageConnectedSocket", "Sender After send encrypted")
                         Toast.makeText(this@QuickshareActivity, "Match code received, sending encrypted message.", Toast.LENGTH_SHORT).show()
                     } else {
-                        Log.d("manageConnectedSocket", "Match codes did not match")
+                        Log.d("manageConnectedSocket", "Sender Match codes did not match")
                         sendAcknowledgment(false)
                     }
                 } catch (e: Exception) {
@@ -277,10 +278,10 @@ class QuickshareActivity : AppCompatActivity() {
                 val socket: BluetoothSocket? = serverSocket?.accept()
                 socket?.let {
                     connectionStartTime = SystemClock.elapsedRealtime()
-                    Log.d("manageConnectedSocket", "Socket open before MCS call: ${socket?.isConnected}")
+                    Log.d("manageConnectedSocket", "Receiver Socket open before MCS call: ${socket?.isConnected}")
 
                     manageConnectedSocket(it)
-                    Log.d("manageConnectedSocket", "Socket open after MCS call: ${socket?.isConnected}")
+                    Log.d("manageConnectedSocket", "Receiver Socket open after MCS call: ${socket?.isConnected}")
 
                     runOnUiThread {
                         Toast.makeText(this@QuickshareActivity, "Bluetooth server accepted connection.", Toast.LENGTH_SHORT).show()
@@ -293,7 +294,7 @@ class QuickshareActivity : AppCompatActivity() {
         }
 
         private fun manageConnectedSocket(socket: BluetoothSocket) {
-            Log.d("manageConnectedSocket", "Socket open at beggingin: ${socket?.isConnected}")
+            Log.d("manageConnectedSocket", "Receiver Socket open at beggingin: ${socket?.isConnected}")
 
             val inputStream: InputStream = socket.inputStream
             val outputStream: OutputStream = socket.outputStream
@@ -302,11 +303,14 @@ class QuickshareActivity : AppCompatActivity() {
             var bytes: Int
             while (true) {
                 try {
-                    Log.d("manageConnectedSocket", "Socket open at begigning of loop: ${socket?.isConnected}")
+                    Log.d("manageConnectedSocket", "Receiver Socket open at begigning of loop: ${socket?.isConnected}")
 
                     bytes = inputStream.read(buffer)
+                    Log.d("manageConnectedSocket", "Receiver Socket open at after input read: ${socket?.isConnected}")
+                    Log.d("manageConnectedSocket", "bytes: $bytes")
                     if (bytes == -1) break
                     val receivedMessage = String(buffer, 0, bytes)
+                    Log.d("manageConnectedSocket", "Received message: $receivedMessage")
                     if (receivedMessage == matchCode) {
                         sendAcknowledgment(true)
                         bytes = inputStream.read(buffer)
@@ -322,7 +326,7 @@ class QuickshareActivity : AppCompatActivity() {
                         sendAcknowledgment(false)
                     }
                 } catch (e: Exception) {
-                    Log.d("manageConnectedSocket", "Socket open at excpetion: ${socket?.isConnected}")
+                    Log.d("manageConnectedSocket", "Receiver Socket open at excpetion: ${socket?.isConnected}")
                     logConnectionDuration("From Server MCS, Excpetion: ${e.message}", SystemClock.currentThreadTimeMillis() - connectionStartTime)
                     Log.d("manageConnectedSocket", e.message ?: "No message")
                     break
