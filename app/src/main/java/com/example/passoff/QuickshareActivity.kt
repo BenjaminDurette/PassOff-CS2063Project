@@ -47,7 +47,6 @@ class QuickshareActivity : AppCompatActivity() {
 
         isSenderMode = intent.getBooleanExtra("isSenderMode", false)
         passwordToSend = intent.getStringExtra("passwordToSend")
-        Log.d("QuickshareActivity", "Received passwordToSend: $passwordToSend")
 
         binding.beginWaitingButton.text = if (isSenderMode) "Send Password" else "Receive Password"
 
@@ -114,18 +113,15 @@ class QuickshareActivity : AppCompatActivity() {
             bluetoothAdapter.cancelDiscovery()
         }
         bluetoothAdapter?.startDiscovery()
-        Toast.makeText(this, "Starting Bluetooth discovery...", Toast.LENGTH_SHORT).show()
     }
 
     private fun stopDiscovery() {
         bluetoothAdapter?.cancelDiscovery()
-        Toast.makeText(this, "Stopping Bluetooth discovery...", Toast.LENGTH_SHORT).show()
     }
 
     private fun startServer() {
         serverThread = BluetoothServerThread()
         serverThread?.start()
-        Toast.makeText(this, "Bluetooth server started.", Toast.LENGTH_SHORT).show()
     }
 
     private fun connectToDevice(device: BluetoothDevice) {
@@ -138,7 +134,6 @@ class QuickshareActivity : AppCompatActivity() {
     private fun sendEncryptedMessage(message: String) {
         val encryptedMessage = encryptMessage(message, matchCode ?: "test")
         connectionThread?.write(encryptedMessage)
-        Toast.makeText(this, "Encrypted message sent.", Toast.LENGTH_SHORT).show()
     }
 
     private fun encryptMessage(message: String, matchCode: String): String {
@@ -148,10 +143,6 @@ class QuickshareActivity : AppCompatActivity() {
 
     private fun decryptMessage(encryptedMessage: String, matchCode: String): String {
         val key = EncryptionUtils.deriveKeyFromMatchCode(matchCode)
-        Log.d(
-            "java",
-            "After key"
-        )
         return EncryptionUtils.decrypt(encryptedMessage, key)
     }
 
@@ -161,12 +152,10 @@ class QuickshareActivity : AppCompatActivity() {
                 BluetoothDevice.ACTION_FOUND -> {
                     val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                     device?.let {
-                        Toast.makeText(context, "Device found: ${it.name}", Toast.LENGTH_SHORT).show()
                         connectToDevice(it)
                     }
                 }
                 BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
-                    Toast.makeText(context, "Discovery finished", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -185,7 +174,6 @@ class QuickshareActivity : AppCompatActivity() {
             var attempt = 0
             while (attempt < maxRetries) {
                 try {
-                    Log.d("run", "Before socket?.connect()")
                     socket?.connect()
                     connectionStartTime = SystemClock.currentThreadTimeMillis()
                     runOnUiThread {
@@ -194,10 +182,8 @@ class QuickshareActivity : AppCompatActivity() {
                     manageConnectedSocket(socket!!)
                     return
                 } catch (e: IOException) {
-                    Log.d("manageConnectedSocket", e.message ?: "No message")
                     attempt++
                     if (attempt >= maxRetries) {
-                        logConnectionDuration("From NonServer Run, attempts> max retries", SystemClock.currentThreadTimeMillis() - connectionStartTime)
                         runOnUiThread {
                             Toast.makeText(this@QuickshareActivity, "Failed to connect to device: ${device.name}", Toast.LENGTH_SHORT).show()
                         }
@@ -209,7 +195,6 @@ class QuickshareActivity : AppCompatActivity() {
         }
 
         private fun manageConnectedSocket(socket: BluetoothSocket) {
-            Log.d("manageConnectedSocket", "Sender Beggining")
             val inputStream = socket.inputStream
             val outputStream = socket.outputStream
 
@@ -218,62 +203,35 @@ class QuickshareActivity : AppCompatActivity() {
 
                 try {
                     Thread.sleep(100)
-                    Log.d("manageConnectedSocket", "Sender Before inputStream.read")
                     bytes = inputStream.read(buffer)
-                    Log.d("manageConnectedSocket", "Sender After inputStream.read")
                     val receivedMessage = String(buffer, 0, bytes)
-                    Log.d("MatchCheck", "Received: $receivedMessage")
-                    Log.d("MatchCheck", "MatchCode: $matchCode")
-                    Log.d("manageConnectedSocket", "After String buffer")
                     if (receivedMessage == matchCode) {
                         Thread.sleep(100)
                         sendEncryptedMessage(passwordToSend ?: "")
-                        Log.d("manageConnectedSocket", "Sender After send encrypted")
-                        runOnUiThread {
-                            Toast.makeText(
-                                this@QuickshareActivity,
-                                "Match code received, sending encrypted message.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
                     } else {
-                        Log.d("manageConnectedSocket", "Sender Match codes did not match")
                         sendAcknowledgment(false)
                     }
                 } catch (e: Exception) {
-                    logConnectionDuration("From NonServer MCS, Exception: ${e.message}", SystemClock.currentThreadTimeMillis() - connectionStartTime)
-                    Log.d("manageConnectedSocket", e.message ?: "No message")
-                }
+                    e.printStackTrace()                }
         }
 
         private fun sendAcknowledgment(isSuccess: Boolean) {
             val acknowledgment = if (isSuccess) "MATCH_SUCCESS" else "MATCH_FAILED"
             write(acknowledgment)
-            Toast.makeText(this@QuickshareActivity, "Acknowledgment sent: $acknowledgment", Toast.LENGTH_SHORT).show()
         }
 
         fun write(message: String) {
             try {
-                Log.d("manageConnectedSocket", "writing message: ${message}")
                 socket?.outputStream?.write(message.toByteArray())
-                runOnUiThread {
-                    Toast.makeText(this@QuickshareActivity, "Message sent: $message", Toast.LENGTH_SHORT).show()
-                }
             } catch (e: Exception) {
                 e.printStackTrace()
-                Log.d("manageConnectedSocket", e.message ?: "No message")
             }
         }
 
         fun cancel() {
             try {
                 socket?.close()
-                logConnectionDuration("From NonServer Cancel", SystemClock.currentThreadTimeMillis() - connectionStartTime)
-                runOnUiThread {
-                    Toast.makeText(this@QuickshareActivity, "Connection closed.", Toast.LENGTH_SHORT).show()
-                }
             } catch (e: Exception) {
-                Log.d("manageConnectedSocket", e.message ?: "No message")
                 e.printStackTrace()
             }
         }
@@ -290,42 +248,28 @@ class QuickshareActivity : AppCompatActivity() {
                 socket = serverSocket?.accept()
                 socket?.let {
                     connectionStartTime = SystemClock.elapsedRealtime()
-                    Log.d("manageConnectedSocket", "Receiver Socket open before MCS call: ${socket?.isConnected}")
-
                     manageConnectedSocket(it)
-                    Log.d("manageConnectedSocket", "Receiver Socket open after MCS call: ${socket?.isConnected}")
-
-                    runOnUiThread {
-                        Toast.makeText(this@QuickshareActivity, "Bluetooth server accepted connection.", Toast.LENGTH_SHORT).show()
-                    }
                 }
             } catch (e: Exception) {
-                logConnectionDuration("From Server Run, Exception: ${e.message}", SystemClock.currentThreadTimeMillis() - connectionStartTime)
-                Log.e("BluetoothServerThread", "Error accepting connection: ${e.message}")
+                e.printStackTrace()
             }
         }
 
         private fun manageConnectedSocket(socket: BluetoothSocket) {
-            Log.d("manageConnectedSocket", "Receiver Socket open at beggingin: ${socket?.isConnected}")
 
             val inputStream: InputStream = socket.inputStream
             val outputStream: OutputStream = socket.outputStream
 
-            Log.d("MatchCheck", "MatchCodeToSend: $matchCode")
             write(matchCode ?: "")
 
             val buffer = ByteArray(1024)
             var bytes: Int
 
                 try {
-                    Log.d("manageConnectedSocket", "Receiver Socket open at begigning of loop: ${socket?.isConnected}")
 
                     bytes = inputStream.read(buffer)
-                    Log.d("manageConnectedSocket", "Receiver Socket open at after input read: ${socket?.isConnected}")
-                    Log.d("manageConnectedSocket", "bytes: $bytes")
 
                     val receivedMessage = String(buffer, 0, bytes)
-                    Log.d("manageConnectedSocket", "Received message: $receivedMessage")
                     if (receivedMessage == "MATCH_FAILED") {
                         runOnUiThread {
                             Toast.makeText(
@@ -335,69 +279,37 @@ class QuickshareActivity : AppCompatActivity() {
                             ).show()
                         }
                     }
-                    Log.d(
-                        "java",
-                        "Before Decrypt"
-                    )
                     val decryptedMessage = decryptMessage(receivedMessage, matchCode ?: "")
                     runOnUiThread {
                         binding.sharedPasswordText.text = "Received message: $decryptedMessage"
                         binding.sharedPasswordText.visibility = android.view.View.VISIBLE
                     }
-                    Log.d(
-                        "java",
-                        "After Decrypt"
-                    )
                      sendAcknowledgment(true)
                 } catch (e: Exception) {
-                    Log.d(
-                        "manageConnectedSocket",
-                        "Receiver Socket open at excpetion: ${socket?.isConnected}"
-                    )
-                    logConnectionDuration(
-                        "From Server MCS, Excpetion: ${e.message}",
-                        SystemClock.currentThreadTimeMillis() - connectionStartTime
-                    )
-                    Log.d("manageConnectedSocket", e.message ?: "No message")
-
+                    e.printStackTrace()
                 }
         }
 
         private fun sendAcknowledgment(isSuccess: Boolean) {
             val acknowledgment = if (isSuccess) "MATCH_SUCCESS" else "MATCH_FAILED"
             write(acknowledgment)
-            runOnUiThread {
-                Toast.makeText(this@QuickshareActivity, "Acknowledgment sent: $acknowledgment", Toast.LENGTH_SHORT).show()
-            }
         }
 
         fun cancel() {
             try {
                 serverSocket?.close()
-                logConnectionDuration("From Server Cancel", SystemClock.currentThreadTimeMillis() - connectionStartTime)
-                runOnUiThread {
-                    Toast.makeText(this@QuickshareActivity, "Server connection closed.", Toast.LENGTH_SHORT).show()
-                }
             } catch (e: Exception) {
-                Log.d("manageConnectedSocket", e.message ?: "No message")
                 e.printStackTrace()
             }
         }
 
         fun write(message: String) {
             try {
-                Log.d("manageConnectedSocket", "writing message: ${message}")
                  socket?.outputStream?.write(message.toByteArray())
             } catch (e: Exception) {
-                Log.d("manageConnectedSocket", e.message ?: "No message")
-
                 e.printStackTrace()
             }
         }
-    }
-
-    fun logConnectionDuration(tag: String, time: Long){
-        Log.d("Connection Duration", "${tag}: Connection duration: $time ms")
     }
 
     companion object {
