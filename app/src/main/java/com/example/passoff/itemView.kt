@@ -59,7 +59,7 @@ class itemView : AppCompatActivity() {
         // Decrypt button click listener
         copyButton.setOnClickListener {
             copyPasswordToClipboard(password)
-            Toast.makeText(this, "Quickshare selected", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Password copied to clipboard", Toast.LENGTH_SHORT).show()
         }
 
         val quickshareButton = findViewById<Button>(R.id.quickshare_button)
@@ -71,7 +71,9 @@ class itemView : AppCompatActivity() {
             if (BluetoothUtils.areBluetoothPermissionsGranted(this)) {
                 // If Bluetooth permissions are available, start the QuickshareActivity
                 val intent = Intent(this, QuickshareActivity::class.java)
-                intent.putExtra("isSenderMode", true).putExtra("passwordToSend", password)
+                intent.putExtra("isSenderMode", true)
+                (password)?.let { it1 -> Log.d("Items password", it1) }
+                intent.putExtra("passwordToSend",  password)
                 startActivity(intent)
             } else {
                 // If Bluetooth permissions are not available, show a Toast message
@@ -132,17 +134,4 @@ class itemView : AppCompatActivity() {
         return keyGen.generateKey()
     }
 
-    private fun encryptPassword(password: String): String {
-        val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-        val encryptedBytes = cipher.doFinal(password.toByteArray())
-        return Base64.encodeToString(encryptedBytes, Base64.DEFAULT)
-    }
-
-    private fun decrypt(encrypted: String): String {
-        val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.DECRYPT_MODE, secretKey)
-        val decryptedBytes = cipher.doFinal(Base64.decode(encrypted, Base64.DEFAULT))
-        return String(decryptedBytes)
-    }
 }

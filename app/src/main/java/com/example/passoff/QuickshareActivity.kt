@@ -45,6 +45,7 @@ class QuickshareActivity : AppCompatActivity() {
 
         isSenderMode = intent.getBooleanExtra("isSenderMode", false)
         passwordToSend = intent.getStringExtra("passwordToSend")
+        Log.d("QuickshareActivity", "Received passwordToSend: $passwordToSend")
 
         binding.beginWaitingButton.text = if (isSenderMode) "Send Password" else "Receive Password"
 
@@ -59,6 +60,7 @@ class QuickshareActivity : AppCompatActivity() {
                 if (isSenderMode) {
                     startDiscovery()
                 } else {
+                    makeDeviceDiscoverable()
                     startServer()
                 }
             } else {
@@ -67,11 +69,16 @@ class QuickshareActivity : AppCompatActivity() {
         }
     }
 
+    private fun makeDeviceDiscoverable() {
+        val discoverableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
+        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300)
+        startActivity(discoverableIntent)
+    }
+
     override fun onResume() {
         super.onResume()
         registerReceiver(deviceReceiver, IntentFilter(BluetoothDevice.ACTION_FOUND))
         registerReceiver(deviceReceiver, IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED))
-        Toast.makeText(this, "Bluetooth receivers registered.", Toast.LENGTH_SHORT).show()
     }
 
     override fun onPause() {
@@ -80,7 +87,6 @@ class QuickshareActivity : AppCompatActivity() {
         stopDiscovery()
         connectionThread?.cancel()
         serverThread?.cancel()
-        Toast.makeText(this, "Bluetooth receivers unregistered and discovery stopped.", Toast.LENGTH_SHORT).show()
     }
 
     private fun startDiscovery() {

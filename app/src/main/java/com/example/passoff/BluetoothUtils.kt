@@ -15,6 +15,8 @@ object BluetoothUtils {
         // Check if Bluetooth permissions are granted
         val bluetoothPermission = ContextCompat.checkSelfPermission(activity, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED
         val bluetoothAdminPermission = ContextCompat.checkSelfPermission(activity, Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED
+        val AccessFineLocationPermission = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        val AccessCoarseLocationPermission = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
         // Check additional permissions for Android 12 and above
         val bluetoothConnectPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -30,10 +32,12 @@ object BluetoothUtils {
         }
 
         // If any of the permissions are not granted, request them
-        if (!bluetoothPermission || !bluetoothAdminPermission || !bluetoothConnectPermission || !bluetoothScanPermission) {
+        if (!bluetoothPermission || !bluetoothAdminPermission || !bluetoothConnectPermission || !bluetoothScanPermission || !AccessFineLocationPermission || !AccessCoarseLocationPermission) {
             val permissionsToRequest = mutableListOf(
                 Manifest.permission.BLUETOOTH,
-                Manifest.permission.BLUETOOTH_ADMIN
+                Manifest.permission.BLUETOOTH_ADMIN,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
             )
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
