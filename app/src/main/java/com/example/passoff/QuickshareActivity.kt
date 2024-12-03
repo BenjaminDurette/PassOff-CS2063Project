@@ -243,11 +243,14 @@ class QuickshareActivity : AppCompatActivity() {
                             ).show()
                         }
                     }
+                    closeConnection()
                 } else {
                     sendAcknowledgment(false)
+                    closeConnection()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                closeConnection()
             }
         }
 
@@ -259,6 +262,14 @@ class QuickshareActivity : AppCompatActivity() {
         fun write(message: String) {
             try {
                 socket?.outputStream?.write(message.toByteArray())
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        fun closeConnection() {
+            try {
+                socket?.close()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -314,17 +325,21 @@ class QuickshareActivity : AppCompatActivity() {
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
+                        closeConnection()
+                        return;
                     }
                     val decryptedMessage = decryptMessage(receivedMessage, matchCode ?: "")
                     sharedPassword = decryptedMessage
                     runOnUiThread {
-                        binding.sharedPasswordText.text = "Received message: $sharedPassword"
+                        binding.sharedPasswordText.text = "Received Password: $sharedPassword"
                         binding.sharedPasswordText.visibility = android.view.View.VISIBLE
                         binding.copyPasswordButton.visibility = android.view.View.VISIBLE
                     }
                      sendAcknowledgment(true)
+                    closeConnection()
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    closeConnection()
                 }
         }
 
@@ -335,6 +350,15 @@ class QuickshareActivity : AppCompatActivity() {
 
         fun cancel() {
             try {
+                serverSocket?.close()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        fun closeConnection() {
+            try {
+                socket?.close()
                 serverSocket?.close()
             } catch (e: Exception) {
                 e.printStackTrace()
