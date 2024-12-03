@@ -74,14 +74,9 @@ class QuickshareActivity : AppCompatActivity() {
 
     private fun copyPasswordToClipboard(password: String?) {
         if (password != null) {
-            // Get the ClipboardManager
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            // Create a ClipData object
             val clip = ClipData.newPlainText("Password", password)
-            // Set the clip
             clipboard.setPrimaryClip(clip)
-
-            // Show a toast message to inform the user
             Toast.makeText(this, "Password copied to clipboard", Toast.LENGTH_SHORT).show()
         }
     }
