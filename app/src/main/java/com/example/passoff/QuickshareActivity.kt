@@ -1,6 +1,5 @@
 package com.example.passoff
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -11,14 +10,10 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.SystemClock
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.example.passoff.databinding.ActivityQuickshareBinding
 import java.io.IOException
 import java.io.InputStream
@@ -158,12 +153,12 @@ class QuickshareActivity : AppCompatActivity() {
     }
 
     private fun encryptMessage(message: String, matchCode: String): String {
-        val key = EncryptionUtils.deriveKeyFromMatchCode(matchCode)
+        val key = EncryptionUtils.deriveKeyFromString(matchCode)
         return EncryptionUtils.encrypt(message, key)
     }
 
     private fun decryptMessage(encryptedMessage: String, matchCode: String): String {
-        val key = EncryptionUtils.deriveKeyFromMatchCode(matchCode)
+        val key = EncryptionUtils.deriveKeyFromString(matchCode)
         return EncryptionUtils.decrypt(encryptedMessage, key)
     }
 
@@ -221,39 +216,39 @@ class QuickshareActivity : AppCompatActivity() {
 
             val buffer = ByteArray(1024)
             var bytes: Int
-
-                try {
+            try {
+                Thread.sleep(100)
+                bytes = inputStream.read(buffer)
+                val receivedMessage = String(buffer, 0, bytes)
+                if (receivedMessage == matchCode) {
                     Thread.sleep(100)
+                    sendEncryptedMessage(passwordToSend ?: "")
                     bytes = inputStream.read(buffer)
-                    val receivedMessage = String(buffer, 0, bytes)
-                    if (receivedMessage == matchCode) {
-                        Thread.sleep(100)
-                        sendEncryptedMessage(passwordToSend ?: "")
-                        bytes = inputStream.read(buffer)
 
-                        val receivedAcknowledgement = String(buffer, 0, bytes)
-                        if (receivedAcknowledgement == "MATCH_FAILED") {
-                            runOnUiThread {
-                                Toast.makeText(
-                                    this@QuickshareActivity,
-                                    "Failed to share password",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }else{
-                            runOnUiThread {
-                                Toast.makeText(
-                                    this@QuickshareActivity,
-                                    "Password shared successfully!",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
+                    val receivedAcknowledgement = String(buffer, 0, bytes)
+                    if (receivedAcknowledgement == "MATCH_FAILED") {
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@QuickshareActivity,
+                                "Failed to share password",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
-                    } else {
-                        sendAcknowledgment(false)
+                    }else{
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@QuickshareActivity,
+                                "Password shared successfully!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()                }
+                } else {
+                    sendAcknowledgment(false)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
         private fun sendAcknowledgment(isSuccess: Boolean) {
@@ -304,7 +299,7 @@ class QuickshareActivity : AppCompatActivity() {
             write(matchCode ?: "")
 
             val buffer = ByteArray(1024)
-            var bytes: Int
+            val bytes: Int
 
                 try {
 

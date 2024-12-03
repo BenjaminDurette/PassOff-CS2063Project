@@ -2,6 +2,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import com.example.passoff.EncryptionUtils
 
 class UserDBHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -28,9 +29,10 @@ class UserDBHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME,
 
     // Insert a record
     fun addLogin(password: String): Long {
+        val encryptedPassword = EncryptionUtils.encrypt(password, EncryptionUtils.deriveKeyFromString("eldenRing"))
         val db = this.writableDatabase
         val values = ContentValues().apply {
-            put(KEY_PASSWORD, password)
+            put(KEY_PASSWORD, encryptedPassword)
         }
         val result = db.insert(TABLE_LOGIN, null, values)
         db.close()

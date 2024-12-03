@@ -1,41 +1,33 @@
-import java.security.MessageDigest
+package com.example.passoff
+
 import java.security.SecureRandom
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.PBEKeySpec
 import javax.crypto.Cipher
-import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import android.util.Base64
 
-class EncryptionUtils {
+object EncryptionUtils {
+    private const val SALT = "eldenRing" // Use a fixed salt value
 
-    companion object {
+    fun deriveKeyFromString(password: String): SecretKeySpec {
+        val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
+        val spec = PBEKeySpec(password.toCharArray(), SALT.toByteArray(), 10000, 256)
+        val tmp = factory.generateSecret(spec)
+        return SecretKeySpec(tmp.encoded, "AES")
+    }
 
-        fun deriveKeyFromMatchCode(matchCode: String): ByteArray {
-            val digest = MessageDigest.getInstance("SHA-256")
-            return digest.digest(matchCode.toByteArray(Charsets.UTF_8))
-        }
+    fun encrypt(data: String, key: SecretKeySpec): String {
+        val cipher = Cipher.getInstance("AES")
+        cipher.init(Cipher.ENCRYPT_MODE, key)
+        val encrypted = cipher.doFinal(data.toByteArray())
+        return Base64.encodeToString(encrypted, Base64.DEFAULT)
+    }
 
-        fun encrypt(message: String, key: ByteArray): String {
-            val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-            val secretKeySpec = SecretKeySpec(key, "AES")
-            val iv = ByteArray(16)
-            SecureRandom().nextBytes(iv)
-            val ivSpec = IvParameterSpec(iv)
-            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivSpec)
-            val encryptedBytes = cipher.doFinal(message.toByteArray(Charsets.UTF_8))
-            val ivAndEncryptedMessage = iv + encryptedBytes
-            return Base64.encodeToString(ivAndEncryptedMessage, Base64.DEFAULT)
-        }
-
-        fun decrypt(encryptedMessage: String, key: ByteArray): String {
-            val ivAndEncryptedMessage = Base64.decode(encryptedMessage, Base64.DEFAULT)
-            val iv = ivAndEncryptedMessage.copyOfRange(0, 16)
-            val encryptedBytes = ivAndEncryptedMessage.copyOfRange(16, ivAndEncryptedMessage.size)
-            val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-            val secretKeySpec = SecretKeySpec(key, "AES")
-            val ivSpec = IvParameterSpec(iv)
-            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivSpec)
-            val decryptedBytes = cipher.doFinal(encryptedBytes)
-            return String(decryptedBytes, Charsets.UTF_8)
-        }
+    fun decrypt(data: String, key: SecretKeySpec): String {
+        val cipher = Cipher.getInstance("AES")
+        cipher.init(Cipher.DECRYPT_MODE, key)
+        val decrypted = cipher.doFinal(Base64.decode(data, Base64.DEFAULT))
+        return String(decrypted)
     }
 }

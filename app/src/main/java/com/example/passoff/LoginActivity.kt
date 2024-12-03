@@ -69,10 +69,12 @@ class LoginActivity : AppCompatActivity() {
         if (logins.isEmpty()) {
             return false
         }
-        val storedPassword = logins[0]["password"]
-        if (storedPassword != password) {
+        val storedEncryptedPassword = logins[0]["password"]
+        val encryptedPassword = EncryptionUtils.encrypt(password, EncryptionUtils.deriveKeyFromString("eldenRing"))
+        if (storedEncryptedPassword != encryptedPassword) {
             return false
         }
+        SessionManager.setMasterPassword(password)
         return true
     }
 }

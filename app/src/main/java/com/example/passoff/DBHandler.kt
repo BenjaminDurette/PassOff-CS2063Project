@@ -7,6 +7,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 class DBHandler (context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
 
+    private val masterPassword = SessionManager.getMasterPassword()
+    private val passItemKey = EncryptionUtils.deriveKeyFromString(masterPassword!!)
+
     override fun onCreate(db: SQLiteDatabase) {
         val query = ("CREATE TABLE " + TABLE_NAME + " ("
                 + ID_COL + " INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -23,9 +26,11 @@ class DBHandler (context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, D
         val db = this.writableDatabase
         val values = ContentValues()
 
+        val encryptedPassword = EncryptionUtils.encrypt(password!!, passItemKey);
+
         values.put(ENTRYNAME_COL, entryName)
         values.put(USERNAME_COL, username)
-        values.put(PASSWORD_COL, password)
+        values.put(PASSWORD_COL, encryptedPassword)
         values.put(DESCRIPTION_COL, description)
 
         db.insert(TABLE_NAME, null, values)
@@ -54,9 +59,12 @@ class DBHandler (context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, D
     fun updatePassword(id: Int, entryName: String?, username: String?, password: String?, url: String?): Boolean {
         val db = this.writableDatabase
         val values = ContentValues()
+
+        val encryptedPassword = EncryptionUtils.encrypt(password!!, passItemKey);
+
         values.put(ENTRYNAME_COL, entryName)
         values.put(USERNAME_COL, username)
-        values.put(PASSWORD_COL, password)
+        values.put(PASSWORD_COL, encryptedPassword)
         values.put(DESCRIPTION_COL, url)
 
         db.update(TABLE_NAME, values, "$ID_COL=?", arrayOf(id.toString()))
@@ -72,10 +80,10 @@ class DBHandler (context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, D
             val id = cursor.getInt(cursor.getColumnIndexOrThrow(ID_COL))
             val title = cursor.getString(cursor.getColumnIndexOrThrow(ENTRYNAME_COL))
             val username = cursor.getString(cursor.getColumnIndexOrThrow(USERNAME_COL))
-            val password = cursor.getString(cursor.getColumnIndexOrThrow(PASSWORD_COL))
+            val encryptedPassword = cursor.getString(cursor.getColumnIndexOrThrow(PASSWORD_COL))
+            val decryptedPassword = EncryptionUtils.decrypt(encryptedPassword, passItemKey)
             val domain = cursor.getString(cursor.getColumnIndexOrThrow(DESCRIPTION_COL))
-
-            passItem = PassItem(id, title, username, password, domain)
+            passItem = PassItem(id, title, username, decryptedPassword, domain)
         }
         cursor.close()
         db.close()
@@ -92,10 +100,11 @@ class DBHandler (context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, D
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow(ID_COL))
                 val title = cursor.getString(cursor.getColumnIndexOrThrow(ENTRYNAME_COL))
                 val username = cursor.getString(cursor.getColumnIndexOrThrow(USERNAME_COL))
-                val password = cursor.getString(cursor.getColumnIndexOrThrow(PASSWORD_COL))
+                val encryptedPassword = cursor.getString(cursor.getColumnIndexOrThrow(PASSWORD_COL))
+                val decryptedPassword = EncryptionUtils.decrypt(encryptedPassword, passItemKey)
                 val domain = cursor.getString(cursor.getColumnIndexOrThrow(DESCRIPTION_COL))
 
-                val passItem = PassItem(id, title, username, password, domain) // Ensure PassItem constructor matches the columns
+                val passItem = PassItem(id, title, username, decryptedPassword, domain) // Ensure PassItem constructor matches the columns
                 passList.add(passItem)
             } while (cursor.moveToNext())
         }
@@ -114,14 +123,15 @@ class DBHandler (context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, D
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow(ID_COL))
                 val title = cursor.getString(cursor.getColumnIndexOrThrow(ENTRYNAME_COL))
                 val username = cursor.getString(cursor.getColumnIndexOrThrow(USERNAME_COL))
-                val password = cursor.getString(cursor.getColumnIndexOrThrow(PASSWORD_COL))
+                val encryptedPassword = cursor.getString(cursor.getColumnIndexOrThrow(PASSWORD_COL))
+                val decryptedPassword = EncryptionUtils.decrypt(encryptedPassword, passItemKey)
                 val domain = cursor.getString(cursor.getColumnIndexOrThrow(DESCRIPTION_COL))
 
                 val passItem = PassItem(
                     id,
                     title,
                     username,
-                    password,
+                    decryptedPassword,
                     domain
                 ) // Ensure PassItem constructor matches the columns
                 passList.add(passItem)
