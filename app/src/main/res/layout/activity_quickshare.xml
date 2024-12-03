@@ -16,16 +16,26 @@
             android:id="@+id/matchCodeLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Match Code"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:text="Match Code" />
 
         <EditText
             android:id="@+id/matchCodeInput"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginBottom="16dp"
+            android:autofillHints=""
             android:hint="Enter Match Code"
-            android:layout_marginStart="8dp" />
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/confirmPasswordEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Confirm password"
+            android:inputType="textPassword"
+            android:layout_below="@id/passwordEditText"
+            android:layout_marginBottom="16dp" />
     </LinearLayout>
 
     <Button
@@ -44,5 +54,16 @@
         android:text="Password shared successfully!"
         android:visibility="gone"
         android:layout_marginTop="16dp" />
+    <Button
+        android:id="@+id/copyPassword_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:drawable="@android:drawable/ic_menu_delete"
+        android:drawablePadding="8dp"
+        android:focusable="false"
+        android:padding="8dp"
+        android:text="Copy Password"
+        android:visibility="gone" />
 
 </LinearLayout>
